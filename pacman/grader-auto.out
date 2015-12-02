@@ -1,0 +1,38 @@
+fatalError: false
+maxTotalPoints: 13
+messages: []
+mode: auto
+parts:
+- description: ''
+  extraCredit: false
+  maxPoints: 1
+  maxSeconds: 1
+  messages: []
+  name: writeupValid
+  points: 1
+  seconds: 0
+- description: Tests minimax for timeout on smallClassic.
+  extraCredit: false
+  maxPoints: 4
+  maxSeconds: 1
+  messages: []
+  name: 1b-0
+  points: 4
+  seconds: 0
+- description: Tests alphabeta for timeout on smallClassic.
+  extraCredit: false
+  maxPoints: 4
+  maxSeconds: 1
+  messages: []
+  name: 2-0
+  points: 4
+  seconds: 0
+- description: Tests expectimax for timeout on smallClassic.
+  extraCredit: false
+  maxPoints: 4
+  maxSeconds: 1
+  messages: []
+  name: 3b-0
+  points: 4
+  seconds: 0
+totalPoints: 13
