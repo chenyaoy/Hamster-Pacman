@@ -5,13 +5,10 @@ import math
 import threading
 from tk_hamster_GUI import *
 import numpy as np
+import globalVars as g
+import graphics
 
 UPDATE_INTERVAL = 30
-
-gMaxRobotNum = 1; # max number of robots to control
-# gRobotList = None
-gQuit = False
-m = None
 
 class VirtualWorldGui:
     def __init__(self, vWorld, m):
@@ -32,10 +29,6 @@ class VirtualWorldGui:
         self.button3 = tk.Button(m,text="Map")
         self.button3.pack(side='left')
         self.button3.bind('<Button-1>', self.drawMap)
-
-        self.button7 = tk.Button(m,text="Localize")
-        self.button7.pack(side='left')
-        self.button7.bind('<Button-1>', self.localize)
 
         self.button9 = tk.Button(m,text="Exit")
         self.button9.pack(side='left')
@@ -99,8 +92,8 @@ class VirtualWorldGui:
         self.vworld.vrobot.localization_y_points = []
 
     def move_up(self, event=None):
-        if comm.robotList:
-            robot = comm.robotList[0]
+        if g.comm.robotList:
+            robot = g.comm.robotList[0]
             self.vworld.vrobot.sl = 30
             self.vworld.vrobot.sr = 30   
             robot.set_wheel(0,self.vworld.vrobot.sl)
@@ -108,8 +101,8 @@ class VirtualWorldGui:
             self.vworld.vrobot.t = time.time()
 
     def move_down(self, event=None):
-        if comm.robotList:   
-            robot = comm.robotList[0]
+        if g.comm.robotList:   
+            robot = g.comm.robotList[0]
             self.vworld.vrobot.sl = -30
             self.vworld.vrobot.sr = -30   
             robot.set_wheel(0,self.vworld.vrobot.sl)
@@ -117,8 +110,8 @@ class VirtualWorldGui:
             self.vworld.vrobot.t = time.time()
 
     def move_left(self, event=None):
-        if comm.robotList: 
-            robot = comm.robotList[0]
+        if g.comm.robotList: 
+            robot = g.comm.robotList[0]
             self.vworld.vrobot.sl = -15
             self.vworld.vrobot.sr = 15   
             robot.set_wheel(0,self.vworld.vrobot.sl)
@@ -126,8 +119,8 @@ class VirtualWorldGui:
             self.vworld.vrobot.t = time.time()       
 
     def move_right(self, event=None):
-        if comm.robotList: 
-            robot = comm.robotList[0]
+        if g.comm.robotList: 
+            robot = g.comm.robotList[0]
             self.vworld.vrobot.sl = 15
             self.vworld.vrobot.sr = -15  
             robot.set_wheel(0,self.vworld.vrobot.sl)
@@ -135,220 +128,13 @@ class VirtualWorldGui:
             self.vworld.vrobot.t = time.time()      
 
     def stop_move(self, event=None):
-        if comm.robotList: 
-            robot = comm.robotList[0]
+        if g.comm.robotList: 
+            robot = g.comm.robotList[0]
             self.vworld.vrobot.sl = 0
             self.vworld.vrobot.sr = 0
             robot.set_wheel(0,self.vworld.vrobot.sl)
             robot.set_wheel(1,self.vworld.vrobot.sr)
             self.vworld.vrobot.t = time.time()   
-
-    def face_right(self):
-        if 90 <= math.degrees(self.vworld.vrobot.a) % 360 <= 270: # if robot is facing down, turn left
-            self.move_left()
-            while math.degrees(self.vworld.vrobot.a) % 360 < 270:
-                time.sleep(sleepTime)
-                print "a:", math.degrees(self.vworld.vrobot.a) % 360
-            self.stop_move()
-        else: # if robot is facing up, turn right
-            if math.degrees(self.vworld.vrobot.a) % 360 > 270:
-                self.move_right()
-                while math.degrees(self.vworld.vrobot.a) % 360 > 270:
-                    time.sleep(sleepTime)
-                    print "a:", math.degrees(self.vworld.vrobot.a) % 360
-                self.stop_move()
-
-            self.move_right()
-            while math.degrees(self.vworld.vrobot.a) < 90:
-                time.sleep(sleepTime)
-                print "a:", math.degrees(self.vworld.vrobot.a) % 360
-            self.stop_move()
-
-    def face_left(self):
-        if 90 <= math.degrees(self.vworld.vrobot.a) % 360 <= 270: # if robot is facing down, turn right
-            self.move_right()
-            while math.degrees(self.vworld.vrobot.a) % 360 < 270:
-                time.sleep(sleepTime)
-                print "a:", math.degrees(self.vworld.vrobot.a) % 360
-            self.stop_move()
-        else: # if robot is facing up, turn left
-            if math.degrees(self.vworld.vrobot.a) % 360 < 270:
-                self.move_left()
-                while math.degrees(self.vworld.vrobot.a) % 360 < 270:
-                    time.sleep(sleepTime)
-                    print "a:", math.degrees(self.vworld.vrobot.a) % 360
-                self.stop_move()
-            self.move_left()
-            while math.degrees(self.vworld.vrobot.a) % 360 > 270:
-                time.sleep(sleepTime)
-                print "a:", math.degrees(self.vworld.vrobot.a) % 360
-            self.stop_move()
-
-    def face_up(self):
-        if 0 <= math.degrees(self.vworld.vrobot.a) % 360 <= 180: # if robot is facing towards right, turn left
-            self.move_left()
-            while math.degrees(self.vworld.vrobot.a) % 360 > 5:
-                "turning left"
-                time.sleep(sleepTime)
-                print "a:", math.degrees(self.vworld.vrobot.a) % 360 > 5
-            self.stop_move()
-
-        else: # if robot is facing towards left, turn right
-            self.move_right()
-            while math.degrees(self.vworld.vrobot.a) % 360 < 355:
-                time.sleep(sleepTime)
-                print "a:", math.degrees(self.vworld.vrobot.a) % 360
-            self.stop_move()
-
-    def face_down(self):
-        if 0 <= math.degrees(self.vworld.vrobot.a) % 360 <= 180: # if robot is facing towards right, turn right
-            self.move_right()
-            while math.degrees(self.vworld.vrobot.a) < 180:
-                time.sleep(sleepTime)
-                print "a:", math.degrees(self.vworld.vrobot.a) % 360
-            self.stop_move()
-
-        else: # if robot is facing towards left, turn left
-            self.move_left()
-            while math.degrees(self.vworld.vrobot.a) % 360 > 180:
-                time.sleep(sleepTime)
-                print "a:", math.degrees(self.vworld.vrobot.a) % 360
-            self.stop_move()
-
-    def move_to_xy(self, x, y):
-        global sleepTime
-        print "X:", self.vworld.vrobot.x
-        print "Y:", self.vworld.vrobot.y
-        print "a:", math.degrees(self.vworld.vrobot.a)
-
-        if not (-1 <= (self.vworld.vrobot.x - x) <= 1): # if robot is already at correct x coordinate, skip the following
-            if (self.vworld.vrobot.x - x) < 0: # if robot is to the left of destination
-                if 265 <= math.degrees(self.vworld.vrobot.a) % 360 <= 275: # if robot is already facing left, just move backwards
-                    self.move_down()
-                    while (self.vworld.vrobot.x - x) < 0:
-                        time.sleep(sleepTime)
-                        print "VRobot.x:", self.vworld.vrobot.x
-                    self.stop_move()
-
-                else:
-                    if not (85 <= math.degrees(self.vworld.vrobot.a) % 360 <= 95): # make sure robot faces right
-                        self.face_right()
-
-                    self.move_up()
-                    while (self.vworld.vrobot.x - x) < 0:
-                        time.sleep(sleepTime)
-                        print "VRobot.x:", self.vworld.vrobot.x
-                    self.stop_move()
-                
-            if (self.vworld.vrobot.x - x) > 0: # if robot is to the right of destination
-                if 85 <= math.degrees(self.vworld.vrobot.a) % 360 <= 95:
-                    self.move_down()
-                    while (self.vworld.vrobot.x - x) > 0:
-                        time.sleep(sleepTime)
-                        print "VRobot.x:", self.vworld.vrobot.x
-                    self.stop_move()
-
-                else:
-                    if not (265 <= math.degrees(self.vworld.vrobot.a) % 360 <= 275): # make sure robot faces left
-                        self.face_left()
-
-                    self.move_up()
-                    while (self.vworld.vrobot.x - x) > 0:
-                        time.sleep(sleepTime)
-                        print "VRobot.x:", self.vworld.vrobot.x
-                    self.stop_move()
-
-
-        if not (-1 <= (self.vworld.vrobot.y - y) <= 1): # if robot is already at correct y coordinate, skip the following
-            if (self.vworld.vrobot.y - y) < 0: # if robot is below desination
-                if 175 <= math.degrees(self.vworld.vrobot.a) % 360 <= 185: # if robot is facing down already, just move backwards
-                    self.move_down()
-                    while (self.vworld.vrobot.y - y) < 0:
-                        time.sleep(sleepTime)
-                        print "VRobot.y:", self.vworld.vrobot.y
-                    self.stop_move()
-
-                else: 
-                    if not (math.degrees(self.vworld.vrobot.a) % 360 <= 5 or math.degrees(self.vworld.vrobot.a) % 360 >= 355): # make sure robot faces up
-                        self.face_up()
-
-                    self.move_up()
-                    while (self.vworld.vrobot.y - y) < 0:
-                        time.sleep(sleepTime)
-                        print "VRobot.y:", self.vworld.vrobot.y
-                    self.stop_move()
-
-            if (self.vworld.vrobot.y - y) > 0: # if robot is above destination
-                if (math.degrees(self.vworld.vrobot.a) % 360 <= 5 or math.degrees(self.vworld.vrobot.a) % 360 >= 355): # if robot is facing up already, just move backwards
-                    self.move_down()
-                    while (self.vworld.vrobot.y - y) > 0:
-                        time.sleep(sleepTime)
-                        print "VRobot.y:", self.vworld.vrobot.y
-                    self.stop_move()
-
-                else:
-                    if not (175 <= math.degrees(self.vworld.vrobot.a) % 360 <= 185): # make sure robot faces down
-                        self.face_down()
-
-                    self.move_up()
-                    while (self.vworld.vrobot.y - y) > 0:
-                        time.sleep(sleepTime)
-                        print "VRobot.y:", self.vworld.vrobot.y
-                    self.stop_move()
-
-    def find_last_box(self):
-        robot = comm.robotList[0]
-        while not gQuit:
-            time.sleep(0.01)
-            proximity_left = robot.get_proximity(0)
-            proximity_right = robot.get_proximity(1)
-            print "proximity_left:", proximity_left
-            print "proximity_right", proximity_right
-
-            if proximity_right > 60 and proximity_left > 60:
-                print "Box found!"
-                self.stop_move()
-                break
-            if proximity_left - proximity_right > 10:
-                self.move_left()
-            elif proximity_right - proximity_left > 10:
-                self.move_right()
-            else:
-                self.move_up()
-
-
-
-    def navigate(self):
-        while not comm.robotList:
-            print "waiting for robot to connect"
-            time.sleep(0.1)
-        self.vworld.vrobot.x = 230
-        self.vworld.vrobot.a = math.radians(-90)
-
-        print "connected to robot in navigate"
-        time.sleep(1)
-
-        print "hello"
-
-        # go to box A
-        self.move_to_xy(80, 0)
-        time.sleep(1)
-        self.localize("right", 40) # localize to box a
-        time.sleep(1)
-
-        # go to box C
-        self.move_to_xy(80, 120)
-        time.sleep(1)
-        self.move_to_xy(-60, 120)
-        self.face_up()
-        self.localize("top", 140)
-
-        # go to center
-        self.move_to_xy(-60, 0)
-        self.face_left()
-        self.find_last_box()
-        # print "end"
-
 
     def drawMap(self, event=None):
         self.vworld.draw_map()
@@ -448,10 +234,6 @@ class Joystick:
             self.vrobot.t = time.time()  
 
     def update_virtual_robot(self):
-        # this is the robot modeling code - below is a very simple and inaccurate
-        # model, as example of how to use the GUI toolkit you need to create you
-        # own model
-
         noise_prox = 25 # noisy level for proximity
         noise_floor = 20 # floor ambient color - if floor is darker, set higher noise
         p_factor = 1.4 # proximity conversion - assuming linear
@@ -464,7 +246,7 @@ class Joystick:
 
         print "connected to robot in update_virtual_robot"
 
-        while not gQuit:
+        while not g.gQuit:
             if self.gRobotList is not None:
                 robot = self.gRobotList[0]
                 robot.set_wheel_balance(-3)
@@ -502,15 +284,14 @@ class Joystick:
 
 
 def stopProg(event=None):
-    global gQuit
-    global m
-    m.quit()
-    gQuit = True
+    g.m.quit()
+    g.gQuit = True
     print "Exit"
+
 
 def draw_virtual_world(virtual_world, joystick):
     time.sleep(1) # give time for robot to connect.
-    while not gQuit:
+    while not g.gQuit:
         if joystick.gRobotList is not None:
             virtual_world.draw_robot()
             virtual_world.draw_prox("left")
@@ -519,24 +300,21 @@ def draw_virtual_world(virtual_world, joystick):
             virtual_world.draw_floor("right")
         time.sleep(0.1)
 
+
 def main(argv=None): 
-    global m, comm
     global sleepTime
     sleepTime = 0.01
-    comm = RobotComm(gMaxRobotNum)
-    comm.start()
+    g.comm.start()
     print 'Bluetooth starts'
-    m = tk.Tk() #root
+
     drawQueue = Queue.Queue(0)
 
-    #creating tje virtual appearance of the robot
     canvas_width = 700 # half width
     canvas_height = 380 # half height
-    rCanvas = tk.Canvas(m, bg="white", width=canvas_width*2, height=canvas_height*2)
+    rCanvas = tk.Canvas(g.m, bg="white", width=canvas_width*2, height=canvas_height*2)
+    joystick = Joystick(g.comm, g.m, rCanvas)
 
-    joystick = Joystick(comm, m, rCanvas)
-
-    # visual elements of the virtual robot 
+    # # visual elements of the virtual robot 
     poly_points = [0,0,0,0,0,0,0,0]
     joystick.vrobot.poly_id = rCanvas.create_polygon(poly_points, fill='blue') #robot
     joystick.vrobot.prox_l_id = rCanvas.create_line(0,0,0,0, fill="red") #prox sensors
@@ -552,10 +330,11 @@ def main(argv=None):
 
     #create the virtual worlds that contains the virtual robot
     vWorld = virtual_world(drawQueue, joystick.vrobot, rCanvas, canvas_width, canvas_height)
-    #objects in the world
 
+    ''' objects in the world '''
     rectangles = []
 
+    # Outer walls
     rectangles.append([-120, 20, -40, 60])
     rectangles.append([-120, 60, -80, 140])
     rectangles.append([-80, 100, 80, 140])
@@ -568,43 +347,37 @@ def main(argv=None):
     rectangles.append([-360, -100, 360, -140])
     rectangles.append([-120, -20, 120, -60])
 
+    # Right inner walls
     rectangles.append([160, 20, 200, -60])
     rectangles.append([240, 60, 320, 20])
     rectangles.append([280, 20, 320, -20])
     rectangles.append([240, -20, 320, -60])
 
+    # Left inner walls
     rectangles.append([-160, 20, -200, -60])
     rectangles.append([-240, 60, -320, 20])
     rectangles.append([-280, 20, -320, -20])
     rectangles.append([-240, -20, -320, -60])
 
-
-
-    for rect in rectangles:
+    for rect in graphics.rectangles:
         vWorld.add_obstacle(rect)
-
-
 
     draw_world_thread = threading.Thread(target=draw_virtual_world, args=(vWorld, joystick))
     draw_world_thread.daemon = True
     draw_world_thread.start()
 
-    gui = VirtualWorldGui(vWorld, m)
+    gui = VirtualWorldGui(vWorld, g.m)
 
     gui.drawGrid()
     gui.drawMap()
-    
 
     rCanvas.after(200, gui.updateCanvas, drawQueue)
-    m.mainloop()
-
-
-
+    g.m.mainloop()
 
     for robot in joystick.gRobotList:
         robot.reset()
-    comm.stop()
-    comm.join()
+    g.comm.stop()
+    g.comm.join()
 
 
 if __name__ == "__main__":
