@@ -33,25 +33,9 @@ class VirtualWorldGui:
         self.button3.pack(side='left')
         self.button3.bind('<Button-1>', self.drawMap)
 
-        self.button4 = tk.Button(m,text="Trace")
-        self.button4.pack(side='left')
-        self.button4.bind('<Button-1>', self.toggleTrace)
-
-        self.button5 = tk.Button(m,text="Prox Dots")
-        self.button5.pack(side='left')
-        self.button5.bind('<Button-1>', self.toggleProx)
-
-        self.button6 = tk.Button(m,text="Floor Dots")
-        self.button6.pack(side='left')
-        self.button6.bind('<Button-1>', self.toggleFloor)
-
         self.button7 = tk.Button(m,text="Localize")
         self.button7.pack(side='left')
         self.button7.bind('<Button-1>', self.localize)
-
-        self.button8 = tk.Button(m,text="Navigate")
-        self.button8.pack(side='left')
-        self.button8.bind('<Button-1>', self.startNavigateThread)
 
         self.button9 = tk.Button(m,text="Exit")
         self.button9.pack(side='left')
@@ -64,30 +48,6 @@ class VirtualWorldGui:
 
     def resetvRobot(self, event=None):
         self.vworld.vrobot.reset_robot()
-
-    def toggleTrace(self, event=None):
-        if self.vworld.trace:
-            self.vworld.trace = False
-            self.button4["text"] = "Trace"
-        else:
-            self.vworld.trace = True
-            self.button4["text"] = "No Trace"
-
-    def toggleProx(self, event=None):
-        if self.vworld.prox_dots:
-            self.vworld.prox_dots = False
-            self.button5["text"] = "Prox Dots"
-        else:
-            self.vworld.prox_dots = True
-            self.button5["text"] = "No Prox Dots"
-
-    def toggleFloor(self, event=None):
-        if self.vworld.floor_dots:
-            self.vworld.floor_dots = False
-            self.button6["text"] = "Floor Dots"
-        else:
-            self.vworld.floor_dots = True
-            self.button6["text"] = "No Floor Dots"
 
     def leastSquares(self, xvalues, yvalues):
         x = np.array(xvalues)
@@ -593,19 +553,37 @@ def main(argv=None):
     #create the virtual worlds that contains the virtual robot
     vWorld = virtual_world(drawQueue, joystick.vrobot, rCanvas, canvas_width, canvas_height)
     #objects in the world
-    rectF = [0, 50, 40, -50]
-    rectC = [0, 140, -100, 180]
-    rectB = [-100, 180, -140, 80]
-    rectE = [0, -140, -100, -180]
-    rectD = [-100, -180, -140, -80]
-    rectA = [-220, -20, -260, 20]
 
-    vWorld.add_obstacle(rectA)
-    vWorld.add_obstacle(rectB)
-    vWorld.add_obstacle(rectC)
-    vWorld.add_obstacle(rectD)
-    vWorld.add_obstacle(rectE)
-    vWorld.add_obstacle(rectF)
+    rectangles = []
+
+    rectangles.append([-120, 20, -40, 60])
+    rectangles.append([-120, 60, -80, 140])
+    rectangles.append([-80, 100, 80, 140])
+    rectangles.append([120, 60, 80, 140])
+    rectangles.append([120, 20, 40, 60])
+    rectangles.append([120, 100, 400, 140])
+    rectangles.append([360, 100, 400, -140])
+    rectangles.append([-120, 100, -400, 140])
+    rectangles.append([-360, 100, -400, -140])
+    rectangles.append([-360, -100, 360, -140])
+    rectangles.append([-120, -20, 120, -60])
+
+    rectangles.append([160, 20, 200, -60])
+    rectangles.append([240, 60, 320, 20])
+    rectangles.append([280, 20, 320, -20])
+    rectangles.append([240, -20, 320, -60])
+
+    rectangles.append([-160, 20, -200, -60])
+    rectangles.append([-240, 60, -320, 20])
+    rectangles.append([-280, 20, -320, -20])
+    rectangles.append([-240, -20, -320, -60])
+
+
+
+    for rect in rectangles:
+        vWorld.add_obstacle(rect)
+
+
 
     draw_world_thread = threading.Thread(target=draw_virtual_world, args=(vWorld, joystick))
     draw_world_thread.daemon = True
@@ -613,8 +591,14 @@ def main(argv=None):
 
     gui = VirtualWorldGui(vWorld, m)
 
+    gui.drawGrid()
+    gui.drawMap()
+    
+
     rCanvas.after(200, gui.updateCanvas, drawQueue)
     m.mainloop()
+
+
 
 
     for robot in joystick.gRobotList:
