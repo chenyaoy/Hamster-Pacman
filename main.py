@@ -282,7 +282,6 @@ class Joystick:
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
-
     def move_north(self, direction, event=None):
         if self.gRobotList:   
             robot = self.gRobotList[0]
@@ -402,6 +401,13 @@ class Joystick:
                 else:
                     self.vrobot.floor_r = False
             time.sleep(0.05)
+
+def nextGameTurn():
+    # for each agent
+    # get legal moves
+    # decide on move and launch thread to make the move
+    # join threads
+    pass    
 
 
 def stopProg(event=None):
