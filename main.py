@@ -461,32 +461,14 @@ def main(argv=None):
     ''' objects in the world '''
     rectangles = []
 
-    # Outer walls
-    rectangles.append([-120, 20, -40, 60])
-    rectangles.append([-120, 60, -80, 140])
-    rectangles.append([-80, 100, 80, 140])
-    rectangles.append([120, 60, 80, 140])
-    rectangles.append([120, 20, 40, 60])
-    rectangles.append([120, 100, 400, 140])
-    rectangles.append([360, 100, 400, -140])
-    rectangles.append([-120, 100, -400, 140])
-    rectangles.append([-360, 100, -400, -140])
-    rectangles.append([-360, -100, 360, -140])
-    rectangles.append([-120, -20, 120, -60])
-
-    # Right inner walls
-    rectangles.append([160, 20, 200, -60])
-    rectangles.append([240, 60, 320, 20])
-    rectangles.append([280, 20, 320, -20])
-    rectangles.append([240, -20, 320, -60])
-
-    # Left inner walls
-    rectangles.append([-160, 20, -200, -60])
-    rectangles.append([-240, 60, -320, 20])
-    rectangles.append([-280, 20, -320, -20])
-    rectangles.append([-240, -20, -320, -60])
-
-    for rect in graphics.rectangles:
+    #new map
+    rectangles.append([-150, -150, 150, 150]) #overall square
+    rectangles.append([-90, 90, -30, 30])
+    rectangles.append([90, 90, 30, 30])
+    rectangles.append([-90, -90, -30, -30])
+    rectangles.append([90, -90, 30, -30])
+    
+    for rect in rectangles:
         vWorld.add_obstacle(rect)
 
     draw_world_thread = threading.Thread(target=draw_virtual_world, args=(vWorld, joystick))
