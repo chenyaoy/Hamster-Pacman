@@ -139,7 +139,7 @@ class Joystick:
         rCanvas.bind_all('<w>', self.launch_move_forward)
         # rCanvas.bind_all('<s>', self.move_down)
         # rCanvas.bind_all('<a>', self.move_left)
-        rCanvas.bind_all('<d>', self.launch_turn_right)
+        rCanvas.bind_all('<d>', self.launch_turn)
         rCanvas.bind_all('<x>', self.stop_move)  
         rCanvas.pack()
 
@@ -150,6 +150,7 @@ class Joystick:
         print "move fwd thread started"
         # move_fwd_thread.join()
         print "move fwd thread finished"
+    
 
     def move_forward(self):
         if self.gRobotList:
@@ -191,71 +192,10 @@ class Joystick:
             robot.set_wheel(1, 0)
 
             self.vrobot.t = time.time()
-
-    def launch_turn_left(self, event=None):
-        turn_left_thread = threading.Thread(target=self.turn_left)
-        turn_left_thread.daemon = True
-        turn_left_thread.start()
     
-    def turn_left(self):
-        if self.gRobotList:
-            robot = self.gRobotList[0]
-    
-            leftFloor = robot.get_floor(0)
-            rightFloor = robot.get_floor(1)
-            
-            # move forward until both white
-            while not (leftFloor > 40 and rightFloor > 40):
-                self.vrobot.sl = 15
-                self.vrobot.sr = 15
-                robot.set_wheel(0, self.vrobot.sl)
-                robot.set_wheel(1, self.vrobot.sr)
-                leftFloor = robot.get_floor(0)
-                rightFloor = robot.get_floor(1)
-                time.sleep(0.01)
-            
-            self.vrobot.sl = 0
-            self.vrobot.sr = 0
-            robot.set_wheel(0, 0)
-            robot.set_wheel(1, 0)
-            
-            # turn right until hit black then hit white again
-            
-            seenBlack = False
-            
-            while True:
-                if rightFloor < 40:
-                    seenBlack = True
-                    # turn right
-                    self.vrobot.sl = 15
-                    self.vrobot.sr = -15
-                    robot.set_wheel(0, self.vrobot.sl)
-                    robot.set_wheel(1, self.vrobot.sr)
-                elif rightFloor > 40 and seenBlack:
-                    # stop
-                    self.vrobot.sl = 0
-                    self.vrobot.sr = 0
-                    robot.set_wheel(0, 0)
-                    robot.set_wheel(1, 0)
-                    break
-                else:
-                    # turn right
-                    self.vrobot.sl = 15
-                    self.vrobot.sr = -15
-                    robot.set_wheel(0, self.vrobot.sl)
-                    robot.set_wheel(1, self.vrobot.sr)
-                
-                time.sleep(0.01)
-                
-                leftFloor = robot.get_floor(0)
-                rightFloor = robot.get_floor(1)
 
-    def launch_turn_right(self, event=None):
-        turn_right_thread = threading.Thread(target=self.turn_right)
-        turn_right_thread.daemon = True
-        turn_right_thread.start()
-
-    def turn_right(self):
+    def turn(self, direction):
+        ''' direction: -1 for left, 1 for right '''
         if self.gRobotList:
             robot = self.gRobotList[0]
 
@@ -277,19 +217,24 @@ class Joystick:
             robot.set_wheel(0, 0)
             robot.set_wheel(1, 0)
 
-            # turn right until hit black then hit white again
+            # turn in direction until hits black then hits white again
 
             seenBlack = False
+            if direction == -1:
+                floorDir = 0
+            elif direction == 1:
+                floorDir = 1
 
+            floor = robot.get_floor(floorDir)
             while True:
-                if rightFloor < 40:
+                if floor < 40:
                     seenBlack = True
                     # turn right
-                    self.vrobot.sl = -15
-                    self.vrobot.sr = 15
+                    self.vrobot.sl = 15 * direction
+                    self.vrobot.sr = -15 * direction
                     robot.set_wheel(0, self.vrobot.sl)
                     robot.set_wheel(1, self.vrobot.sr)
-                elif rightFloor > 40 and seenBlack:
+                elif floor > 40 and seenBlack:
                     # stop
                     self.vrobot.sl = 0
                     self.vrobot.sr = 0
@@ -298,15 +243,14 @@ class Joystick:
                     break
                 else:
                     # turn right
-                    self.vrobot.sl = -15
-                    self.vrobot.sr = 15
+                    self.vrobot.sl = -15 * direction
+                    self.vrobot.sr = 15 * direction
                     robot.set_wheel(0, self.vrobot.sl)
                     robot.set_wheel(1, self.vrobot.sr)
 
                 time.sleep(0.01)
 
-                leftFloor = robot.get_floor(0)
-                rightFloor = robot.get_floor(1)
+                floor = robot.get_floor(floorDir)
             
 
     def stop_move(self, event=None):
@@ -317,6 +261,26 @@ class Joystick:
             robot.set_wheel(0,self.vrobot.sl)
             robot.set_wheel(1,self.vrobot.sr)
             self.vrobot.t = time.time()  
+
+    def launch_move_north(self, event=None):
+        turn_right_thread = threading.Thread(target=self.move_north)
+        turn_right_thread.daemon = True
+        turn_right_thread.start()
+
+    def launch_move_south(self, event=None):
+        turn_right_thread = threading.Thread(target=self.move_south)
+        turn_right_thread.daemon = True
+        turn_right_thread.start()
+
+    def launch_move_east(self, event=None):
+        turn_right_thread = threading.Thread(target=self.move_east)
+        turn_right_thread.daemon = True
+        turn_right_thread.start()
+
+    def launch_move_west(self, event=None):
+        turn_right_thread = threading.Thread(target=self.move_west)
+        turn_right_thread.daemon = True
+        turn_right_thread.start()
 
 
     def move_north(self, direction, event=None):
@@ -490,8 +454,6 @@ def main(argv=None):
 
     ''' objects in the world '''
     rectangles = []
-    
-    
 
     # Outer walls
     rectangles.append([-120, 20, -40, 60])
