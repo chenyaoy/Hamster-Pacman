@@ -23,6 +23,7 @@ class GameStateData():
         self.pacmanPos = (2, 2)
         ghostPos = [(0, 0), (4, 4)]
 
+
         self.wallLocations = [(1, 1), (1, 3), (3, 1), (3, 3)]
         self.food = Grid(5, 5, True)
         # Locations where pacman, ghosts, and speed boosts start so there is no food there

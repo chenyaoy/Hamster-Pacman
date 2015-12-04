@@ -148,7 +148,7 @@ class Joystick:
         move_fwd_thread.daemon = True
         move_fwd_thread.start()
         print "move fwd thread started"
-        move_fwd_thread.join()
+        # move_fwd_thread.join()
         print "move fwd thread finished"
 
     def move_forward(self):
@@ -192,35 +192,6 @@ class Joystick:
 
             self.vrobot.t = time.time()
 
-
-
-    def move_down(self, event=None):
-        if self.gRobotList:   
-            robot = self.gRobotList[0]
-            self.vrobot.sl = -30
-            self.vrobot.sr = -30   
-            robot.set_wheel(0,self.vrobot.sl)
-            robot.set_wheel(1,self.vrobot.sr)
-            self.vrobot.t = time.time()
-
-    def move_left(self, event=None):
-        if self.gRobotList: 
-            robot = self.gRobotList[0]
-            self.vrobot.sl = -15
-            self.vrobot.sr = 15   
-            robot.set_wheel(0,self.vrobot.sl)
-            robot.set_wheel(1,self.vrobot.sr)
-            self.vrobot.t = time.time()       
-
-    def move_right(self, event=None):
-        if self.gRobotList: 
-            robot = self.gRobotList[0]
-            self.vrobot.sl = 15
-            self.vrobot.sr = -15  
-            robot.set_wheel(0,self.vrobot.sl)
-            robot.set_wheel(1,self.vrobot.sr) 
-            self.vrobot.t = time.time()      
-
     def stop_move(self, event=None):
         if self.gRobotList: 
             robot = self.gRobotList[0]
@@ -229,6 +200,78 @@ class Joystick:
             robot.set_wheel(0,self.vrobot.sl)
             robot.set_wheel(1,self.vrobot.sr)
             self.vrobot.t = time.time()  
+
+
+    def move_north(self, direction, event=None):
+        if self.gRobotList:   
+            robot = self.gRobotList[0]
+
+            if direction == "NORTH":
+                self.move_forward()
+
+            elif direction == "EAST":
+                self.turn_left()
+                self.move_forward()
+
+            elif direction == "WEST":
+                self.turn_right()
+                self.move_forward()
+
+            elif direction == "SOUTH":
+                self.move_backward()
+
+
+    def move_south(self, event=None):
+        if self.gRobotList: 
+            robot = self.gRobotList[0]
+            if direction == "NORTH":
+                self.move_backward()
+
+            elif direction == "EAST":
+                self.turn_right()
+                self.move_forward()
+
+            elif direction == "WEST":
+                self.turn_left()
+                self.move_forward()
+
+            elif direction == "SOUTH":
+                self.move_forward()
+
+    def move_east(self, event=None):
+        if self.gRobotList: 
+            robot = self.gRobotList[0]
+            if direction == "NORTH":
+                self.turn_right()
+                self.move_forward()
+
+            elif direction == "EAST":
+                self.move_forward()
+
+            elif direction == "WEST":
+                self.move_backward()
+
+            elif direction == "SOUTH":
+                self.turn_left()
+                self.move_forward()
+
+    def move_west(self, event=None):
+        if self.gRobotList: 
+            robot = self.gRobotList[0]
+            if direction == "NORTH":
+                self.turn_left()
+                self.move_forward()
+
+            elif direction == "EAST":
+                self.move_backward()
+
+            elif direction == "WEST":
+                self.move_forward()
+
+            elif direction == "SOUTH":
+                self.turn_right()
+                self.move_forward()
+
 
     def update_virtual_robot(self):
         noise_prox = 25 # noisy level for proximity
