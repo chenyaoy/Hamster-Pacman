@@ -148,6 +148,8 @@ class Joystick:
         move_fwd_thread.daemon = True
         move_fwd_thread.start()
         print "move fwd thread started"
+        move_fwd_thread.join()
+        print "move fwd thread finished"
 
     def move_forward(self):
         if self.gRobotList:
@@ -189,6 +191,8 @@ class Joystick:
             robot.set_wheel(1, 0)
 
             self.vrobot.t = time.time()
+
+
 
     def move_down(self, event=None):
         if self.gRobotList:   
