@@ -150,7 +150,7 @@ class Joystick:
         print "move fwd thread started"
         # move_fwd_thread.join()
         print "move fwd thread finished"
-    
+
 
     def move_forward(self):
         if self.gRobotList:
@@ -291,11 +291,11 @@ class Joystick:
                 self.move_forward()
 
             elif direction == "EAST":
-                self.turn_left()
+                self.turn(-1)
                 self.move_forward()
 
             elif direction == "WEST":
-                self.turn_right()
+                self.turn(1)
                 self.move_forward()
 
             elif direction == "SOUTH":
@@ -309,11 +309,11 @@ class Joystick:
                 self.move_backward()
 
             elif direction == "EAST":
-                self.turn_right()
+                self.turn(1)
                 self.move_forward()
 
             elif direction == "WEST":
-                self.turn_left()
+                self.turn(-1)
                 self.move_forward()
 
             elif direction == "SOUTH":
@@ -323,7 +323,7 @@ class Joystick:
         if self.gRobotList: 
             robot = self.gRobotList[0]
             if direction == "NORTH":
-                self.turn_right()
+                self.turn(1)
                 self.move_forward()
 
             elif direction == "EAST":
@@ -333,14 +333,14 @@ class Joystick:
                 self.move_backward()
 
             elif direction == "SOUTH":
-                self.turn_left()
+                self.turn(-1)
                 self.move_forward()
 
     def move_west(self, event=None):
         if self.gRobotList: 
             robot = self.gRobotList[0]
             if direction == "NORTH":
-                self.turn_left()
+                self.turn(-1)
                 self.move_forward()
 
             elif direction == "EAST":
@@ -350,7 +350,7 @@ class Joystick:
                 self.move_forward()
 
             elif direction == "SOUTH":
-                self.turn_right()
+                self.turn(1)
                 self.move_forward()
 
 
