@@ -5,14 +5,16 @@ class Grid():
         self.height = height
         self.data = [[initialValue for y in range(height)] for x in range(width)]
 
-    # def __getitem__(self, i, j):
-    #     return self.data[i][j]
     def __getitem__(self, i):
         return self.data[i]
 
     def __setitem__(self, key, item):
         self.data[key] = item
 
+def printGrid(grid):
+    print "\n".join("\t".join(map(str,l)) for l in grid)
+
+    
 walls = []
 walls.append((1, 1))
 walls.append((1, 3))
@@ -20,11 +22,18 @@ walls.append((3, 1))
 walls.append((3, 3))
 
 
-food = Grid(5, 5, True)
-food[0][0] = False
-food[0][4] = False
-food[4][0] = False
-food[4][4] = False
-food[2][2] = False
+foodGrid = Grid(5, 5, True)
+# Locations where pacman, ghosts, and speed boosts start so there is no food there
+foodGrid[0][0] = False
+foodGrid[0][4] = False
+foodGrid[4][0] = False
+foodGrid[4][4] = False
+foodGrid[2][2] = False
 for wall in walls:
-    food[wall[0]][wall[1]] = False
+    foodGrid[wall[0]][wall[1]] = False
+
+wallGrid = Grid(5, 5, False)
+for wall in walls:
+    wallGrid[wall[0]][wall[1]] = True
+
+
