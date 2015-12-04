@@ -136,16 +136,22 @@ class Joystick:
         self.vrobot = virtual_robot()
         self.vrobot.t = time.time()
 
-        rCanvas.bind_all('<w>', self.move_forward)
+        rCanvas.bind_all('<w>', self.launch_move_forward)
         rCanvas.bind_all('<s>', self.move_down)
         rCanvas.bind_all('<a>', self.move_left)
         rCanvas.bind_all('<d>', self.move_right)
         rCanvas.bind_all('<x>', self.stop_move)  
         rCanvas.pack()
 
-    def move_forward(self, event=None):
+    def launch_move_forward(self, event=None):
+        move_fwd_thread = threading.Thread(target=self.move_forward)
+        move_fwd_thread.daemon = True
+        move_fwd_thread.start()
+        print "move fwd thread started"
+
+    def move_forward(self):
         if self.gRobotList:
-            robot = g.comm.robotList[0]
+            robot = self.gRobotList[0]
             self.vrobot.sl = 30
             self.vrobot.sr = 30   
 
@@ -153,9 +159,12 @@ class Joystick:
             robot.set_wheel(1,self.vrobot.sr)
             time.sleep(0.5)
 
+            print "initial move forward"
+
             leftFloor = robot.get_floor(0)
             rightFloor = robot.get_floor(1)
             while not (leftFloor < 30 and rightFloor < 30):
+                print "while loop"
                 if rightFloor < 30: # right floor sensor sees black, robot turns left
                     self.vrobot.sl = -15
                     self.vrobot.sr = 15  
@@ -166,7 +175,8 @@ class Joystick:
                     self.vrobot.sl = 30
                     self.vrobot.sr = 30   
                 robot.set_wheel(0, self.vrobot.sl)
-                robot.set_wheel(1, self.robot.sr)
+                robot.set_wheel(1, self.vrobot.sr)
+
                 time.sleep(0.1)
 
             self.vrobot.t = time.time()
