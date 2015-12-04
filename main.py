@@ -152,8 +152,8 @@ class Joystick:
     def move_forward(self):
         if self.gRobotList:
             robot = self.gRobotList[0]
-            self.vrobot.sl = 30
-            self.vrobot.sr = 30   
+            self.vrobot.sl = 15
+            self.vrobot.sr = 15   
 
             robot.set_wheel(0,self.vrobot.sl)
             robot.set_wheel(1,self.vrobot.sr)
@@ -163,21 +163,30 @@ class Joystick:
 
             leftFloor = robot.get_floor(0)
             rightFloor = robot.get_floor(1)
-            while not (leftFloor < 30 and rightFloor < 30):
-                print "while loop"
-                if rightFloor < 30: # right floor sensor sees black, robot turns left
-                    self.vrobot.sl = -15
-                    self.vrobot.sr = 15  
-                elif leftFloor < 30: # left floor sensor sees black, robot turns right
+
+            while not (leftFloor < 40 and rightFloor < 40):
+                print "while loop: floorleft %d floorright %d" % (leftFloor, rightFloor)
+                if rightFloor < 40: # right floor sensor sees black, robot turns right
                     self.vrobot.sl = 15
-                    self.vrobot.sr = -15   
+                    self.vrobot.sr = -15  
+                elif leftFloor < 40: # left floor sensor sees black, robot turns left
+                    self.vrobot.sl = -15
+                    self.vrobot.sr = 15   
                 else:
-                    self.vrobot.sl = 30
-                    self.vrobot.sr = 30   
+                    self.vrobot.sl = 15
+                    self.vrobot.sr = 15   
                 robot.set_wheel(0, self.vrobot.sl)
                 robot.set_wheel(1, self.vrobot.sr)
 
-                time.sleep(0.1)
+                time.sleep(0.01)
+
+                leftFloor = robot.get_floor(0)
+                rightFloor = robot.get_floor(1)
+
+            self.vrobot.sl = 0
+            self.vrobot.sr = 0
+            robot.set_wheel(0, 0)
+            robot.set_wheel(1, 0)
 
             self.vrobot.t = time.time()
 
