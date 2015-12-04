@@ -91,51 +91,6 @@ class VirtualWorldGui:
         self.vworld.vrobot.localization_x_points = []
         self.vworld.vrobot.localization_y_points = []
 
-    def move_up(self, event=None):
-        if g.comm.robotList:
-            robot = g.comm.robotList[0]
-            self.vworld.vrobot.sl = 30
-            self.vworld.vrobot.sr = 30   
-            robot.set_wheel(0,self.vworld.vrobot.sl)
-            robot.set_wheel(1,self.vworld.vrobot.sr)
-            self.vworld.vrobot.t = time.time()
-
-    def move_down(self, event=None):
-        if g.comm.robotList:   
-            robot = g.comm.robotList[0]
-            self.vworld.vrobot.sl = -30
-            self.vworld.vrobot.sr = -30   
-            robot.set_wheel(0,self.vworld.vrobot.sl)
-            robot.set_wheel(1,self.vworld.vrobot.sr)
-            self.vworld.vrobot.t = time.time()
-
-    def move_left(self, event=None):
-        if g.comm.robotList: 
-            robot = g.comm.robotList[0]
-            self.vworld.vrobot.sl = -15
-            self.vworld.vrobot.sr = 15   
-            robot.set_wheel(0,self.vworld.vrobot.sl)
-            robot.set_wheel(1,self.vworld.vrobot.sr)
-            self.vworld.vrobot.t = time.time()       
-
-    def move_right(self, event=None):
-        if g.comm.robotList: 
-            robot = g.comm.robotList[0]
-            self.vworld.vrobot.sl = 15
-            self.vworld.vrobot.sr = -15  
-            robot.set_wheel(0,self.vworld.vrobot.sl)
-            robot.set_wheel(1,self.vworld.vrobot.sr) 
-            self.vworld.vrobot.t = time.time()      
-
-    def stop_move(self, event=None):
-        if g.comm.robotList: 
-            robot = g.comm.robotList[0]
-            self.vworld.vrobot.sl = 0
-            self.vworld.vrobot.sr = 0
-            robot.set_wheel(0,self.vworld.vrobot.sl)
-            robot.set_wheel(1,self.vworld.vrobot.sr)
-            self.vworld.vrobot.t = time.time()   
-
     def drawMap(self, event=None):
         self.vworld.draw_map()
 
@@ -181,20 +136,39 @@ class Joystick:
         self.vrobot = virtual_robot()
         self.vrobot.t = time.time()
 
-        rCanvas.bind_all('<w>', self.move_up)
+        rCanvas.bind_all('<w>', self.move_forward)
         rCanvas.bind_all('<s>', self.move_down)
         rCanvas.bind_all('<a>', self.move_left)
         rCanvas.bind_all('<d>', self.move_right)
         rCanvas.bind_all('<x>', self.stop_move)  
         rCanvas.pack()
 
-    def move_up(self, event=None):
+    def move_forward(self, event=None):
         if self.gRobotList:
-            robot = self.gRobotList[0]
+            robot = g.comm.robotList[0]
             self.vrobot.sl = 30
             self.vrobot.sr = 30   
+
             robot.set_wheel(0,self.vrobot.sl)
             robot.set_wheel(1,self.vrobot.sr)
+            time.sleep(0.5)
+
+            leftFloor = robot.get_floor(0)
+            rightFloor = robot.get_floor(1)
+            while not (leftFloor < 30 and rightFloor < 30):
+                if rightFloor < 30: # right floor sensor sees black, robot turns left
+                    self.vrobot.sl = -15
+                    self.vrobot.sr = 15  
+                elif leftFloor < 30: # left floor sensor sees black, robot turns right
+                    self.vrobot.sl = 15
+                    self.vrobot.sr = -15   
+                else:
+                    self.vrobot.sl = 30
+                    self.vrobot.sr = 30   
+                robot.set_wheel(0, self.vrobot.sl)
+                robot.set_wheel(1, self.robot.sr)
+                time.sleep(0.1)
+
             self.vrobot.t = time.time()
 
     def move_down(self, event=None):

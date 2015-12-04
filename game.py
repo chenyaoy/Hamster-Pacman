@@ -11,29 +11,32 @@ class Grid():
     def __setitem__(self, key, item):
         self.data[key] = item
 
-def printGrid(grid):
-    print "\n".join("\t".join(map(str,l)) for l in grid)
-
-    
-walls = []
-walls.append((1, 1))
-walls.append((1, 3))
-walls.append((3, 1))
-walls.append((3, 3))
+    def toString(self, grid):
+        print "\n".join("\t".join(map(str,l)) for l in grid)
 
 
-foodGrid = Grid(5, 5, True)
-# Locations where pacman, ghosts, and speed boosts start so there is no food there
-foodGrid[0][0] = False
-foodGrid[0][4] = False
-foodGrid[4][0] = False
-foodGrid[4][4] = False
-foodGrid[2][2] = False
-for wall in walls:
-    foodGrid[wall[0]][wall[1]] = False
+class GameStateData():
+    def __init__(self, prevState = None):
+        self.lose = False
+        self.win = False
+        self.score = 0
+        self.pacmanPos = (2, 2)
+        ghostPos = [(0, 0), (4, 4)]
 
-wallGrid = Grid(5, 5, False)
-for wall in walls:
-    wallGrid[wall[0]][wall[1]] = True
+        self.wallLocations = [(1, 1), (1, 3), (3, 1), (3, 3)]
+        self.food = Grid(5, 5, True)
+        # Locations where pacman, ghosts, and speed boosts start so there is no food there
+        self.food[0][0] = False
+        self.food[0][4] = False
+        self.food[4][0] = False
+        self.food[4][4] = False
+        self.food[2][2] = False
+        for wall in self.wallLocations:
+            self.food[wall[0]][wall[1]] = False
+                
+        self.walls = Grid(5, 5, False)
+        for wall in self.wallLocations:
+            self.walls[wall[0]][wall[1]] = True
+
 
 
