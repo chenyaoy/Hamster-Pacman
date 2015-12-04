@@ -137,9 +137,9 @@ class Joystick:
         self.vrobot.t = time.time()
 
         rCanvas.bind_all('<w>', self.launch_move_forward)
-        rCanvas.bind_all('<s>', self.move_down)
-        rCanvas.bind_all('<a>', self.move_left)
-        rCanvas.bind_all('<d>', self.move_right)
+        # rCanvas.bind_all('<s>', self.move_down)
+        # rCanvas.bind_all('<a>', self.move_left)
+        rCanvas.bind_all('<d>', self.launch_turn_right)
         rCanvas.bind_all('<x>', self.stop_move)  
         rCanvas.pack()
 
@@ -191,6 +191,65 @@ class Joystick:
             robot.set_wheel(1, 0)
 
             self.vrobot.t = time.time()
+
+    def launch_turn_right(self, event=None):
+        turn_right_thread = threading.Thread(target=self.turn_right)
+        turn_right_thread.daemon = True
+        turn_right_thread.start()
+
+    def turn_right(self):
+        if self.gRobotList:
+            robot = self.gRobotList[0]
+
+            leftFloor = robot.get_floor(0)
+            rightFloor = robot.get_floor(1)
+
+            # move forward until both white
+            while not (leftFloor > 40 and rightFloor > 40):
+                self.vrobot.sl = 15
+                self.vrobot.sr = 15
+                robot.set_wheel(0, self.vrobot.sl)
+                robot.set_wheel(1, self.vrobot.sr)
+                leftFloor = robot.get_floor(0)
+                rightFloor = robot.get_floor(1)
+                time.sleep(0.01)
+
+            self.vrobot.sl = 0
+            self.vrobot.sr = 0
+            robot.set_wheel(0, 0)
+            robot.set_wheel(1, 0)
+
+            # turn right until hit black then hit white again
+
+            seenBlack = False
+
+            while True:
+                if rightFloor < 40:
+                    seenBlack = True
+                    # turn right
+                    self.vrobot.sl = 15
+                    self.vrobot.sr = -15  
+                    robot.set_wheel(0, self.vrobot.sl)
+                    robot.set_wheel(1, self.vrobot.sr)
+                elif rightFloor > 40 and seenBlack:
+                    # stop
+                    self.vrobot.sl = 0
+                    self.vrobot.sr = 0
+                    robot.set_wheel(0, 0)
+                    robot.set_wheel(1, 0)
+                    break
+                else:
+                    # turn right
+                    self.vrobot.sl = 15
+                    self.vrobot.sr = -15  
+                    robot.set_wheel(0, self.vrobot.sl)
+                    robot.set_wheel(1, self.vrobot.sr)
+
+                time.sleep(0.01)
+
+                leftFloor = robot.get_floor(0)
+                rightFloor = robot.get_floor(1)
+            
 
     def stop_move(self, event=None):
         if self.gRobotList: 
