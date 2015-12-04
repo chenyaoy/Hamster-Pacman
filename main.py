@@ -192,6 +192,64 @@ class Joystick:
 
             self.vrobot.t = time.time()
 
+    def launch_turn_left(self, event=None):
+        turn_left_thread = threading.Thread(target=self.turn_left)
+        turn_left_thread.daemon = True
+        turn_left_thread.start()
+    
+    def turn_left(self):
+        if self.gRobotList:
+            robot = self.gRobotList[0]
+    
+            leftFloor = robot.get_floor(0)
+            rightFloor = robot.get_floor(1)
+            
+            # move forward until both white
+            while not (leftFloor > 40 and rightFloor > 40):
+                self.vrobot.sl = 15
+                self.vrobot.sr = 15
+                robot.set_wheel(0, self.vrobot.sl)
+                robot.set_wheel(1, self.vrobot.sr)
+                leftFloor = robot.get_floor(0)
+                rightFloor = robot.get_floor(1)
+                time.sleep(0.01)
+            
+            self.vrobot.sl = 0
+            self.vrobot.sr = 0
+            robot.set_wheel(0, 0)
+            robot.set_wheel(1, 0)
+            
+            # turn right until hit black then hit white again
+            
+            seenBlack = False
+            
+            while True:
+                if rightFloor < 40:
+                    seenBlack = True
+                    # turn right
+                    self.vrobot.sl = 15
+                    self.vrobot.sr = -15
+                    robot.set_wheel(0, self.vrobot.sl)
+                    robot.set_wheel(1, self.vrobot.sr)
+                elif rightFloor > 40 and seenBlack:
+                    # stop
+                    self.vrobot.sl = 0
+                    self.vrobot.sr = 0
+                    robot.set_wheel(0, 0)
+                    robot.set_wheel(1, 0)
+                    break
+                else:
+                    # turn right
+                    self.vrobot.sl = 15
+                    self.vrobot.sr = -15
+                    robot.set_wheel(0, self.vrobot.sl)
+                    robot.set_wheel(1, self.vrobot.sr)
+                
+                time.sleep(0.01)
+                
+                leftFloor = robot.get_floor(0)
+                rightFloor = robot.get_floor(1)
+
     def launch_turn_right(self, event=None):
         turn_right_thread = threading.Thread(target=self.turn_right)
         turn_right_thread.daemon = True
@@ -227,8 +285,8 @@ class Joystick:
                 if rightFloor < 40:
                     seenBlack = True
                     # turn right
-                    self.vrobot.sl = 15
-                    self.vrobot.sr = -15  
+                    self.vrobot.sl = -15
+                    self.vrobot.sr = 15
                     robot.set_wheel(0, self.vrobot.sl)
                     robot.set_wheel(1, self.vrobot.sr)
                 elif rightFloor > 40 and seenBlack:
@@ -240,8 +298,8 @@ class Joystick:
                     break
                 else:
                     # turn right
-                    self.vrobot.sl = 15
-                    self.vrobot.sr = -15  
+                    self.vrobot.sl = -15
+                    self.vrobot.sr = 15
                     robot.set_wheel(0, self.vrobot.sl)
                     robot.set_wheel(1, self.vrobot.sr)
 
@@ -432,6 +490,8 @@ def main(argv=None):
 
     ''' objects in the world '''
     rectangles = []
+    
+    
 
     # Outer walls
     rectangles.append([-120, 20, -40, 60])
