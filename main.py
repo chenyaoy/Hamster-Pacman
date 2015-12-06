@@ -237,7 +237,7 @@ class Joystick:
                     robot.set_wheel(1, self.vrobot.sr)
                 elif floor > 40 and seenBlack:
                     # stop
-                    time.sleep(0.3) # move a bit extra
+                    time.sleep(0.2) # move a bit extra
                     self.vrobot.sl = 0
                     self.vrobot.sr = 0
                     robot.set_wheel(0, 0)
@@ -458,6 +458,7 @@ def main(argv=None):
     global sleepTime
     sleepTime = 0.01
     g.comm.start()
+    
     print 'Bluetooth starts'
 
     global lastMoveDirection
