@@ -137,9 +137,9 @@ class Joystick:
         self.vrobot.t = time.time()
 
         rCanvas.bind_all('<w>', self.launch_move_forward)
-        # rCanvas.bind_all('<s>', self.move_down)
-        # rCanvas.bind_all('<a>', self.move_left)
-        rCanvas.bind_all('<d>', self.launch_turn)
+        rCanvas.bind_all('<s>', self.launch_move_south)
+        rCanvas.bind_all('<a>', self.launch_move_west)
+        rCanvas.bind_all('<d>', self.launch_move_east)
         rCanvas.bind_all('<x>', self.stop_move)  
         rCanvas.pack()
 
@@ -263,26 +263,26 @@ class Joystick:
             self.vrobot.t = time.time()  
 
     def launch_move_north(self, event=None):
-        turn_right_thread = threading.Thread(target=self.move_north)
+        turn_right_thread = threading.Thread(target=self.move_north, args=(lastMoveDirection,))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_south(self, event=None):
-        turn_right_thread = threading.Thread(target=self.move_south)
+        turn_right_thread = threading.Thread(target=self.move_south, args=(lastMoveDirection,))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_east(self, event=None):
-        turn_right_thread = threading.Thread(target=self.move_east)
+        turn_right_thread = threading.Thread(target=self.move_east, args=(lastMoveDirection,))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_west(self, event=None):
-        turn_right_thread = threading.Thread(target=self.move_west)
+        turn_right_thread = threading.Thread(target=self.move_west, args=(lastMoveDirection,))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
-    def move_north(self, direction, event=None):
+    def move_north(self, direction):
         if self.gRobotList:   
             robot = self.gRobotList[0]
 
@@ -300,8 +300,11 @@ class Joystick:
             elif direction == "SOUTH":
                 self.move_backward()
 
+            global lastMoveDirection
+            lastMoveDirection = "NORTH"
 
-    def move_south(self, event=None):
+
+    def move_south(self, direction):
         if self.gRobotList: 
             robot = self.gRobotList[0]
             if direction == "NORTH":
@@ -318,7 +321,10 @@ class Joystick:
             elif direction == "SOUTH":
                 self.move_forward()
 
-    def move_east(self, event=None):
+            global lastMoveDirection
+            lastMoveDirection = "SOUTH"
+
+    def move_east(self, direction):
         if self.gRobotList: 
             robot = self.gRobotList[0]
             if direction == "NORTH":
@@ -335,7 +341,10 @@ class Joystick:
                 self.turn(-1)
                 self.move_forward()
 
-    def move_west(self, event=None):
+            global lastMoveDirection
+            lastMoveDirection = "EAST"
+
+    def move_west(self, direction):
         if self.gRobotList: 
             robot = self.gRobotList[0]
             if direction == "NORTH":
@@ -351,6 +360,9 @@ class Joystick:
             elif direction == "SOUTH":
                 self.turn(1)
                 self.move_forward()
+
+            global lastMoveDirection
+            lastMoveDirection = "WEST"
 
 
     def update_virtual_robot(self):
@@ -433,6 +445,9 @@ def main(argv=None):
     sleepTime = 0.01
     g.comm.start()
     print 'Bluetooth starts'
+
+    global lastMoveDirection
+    lastMoveDirection = "NORTH"
 
     drawQueue = Queue.Queue(0)
 
