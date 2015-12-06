@@ -136,12 +136,13 @@ class Joystick:
         self.vrobot = virtual_robot()
         self.vrobot.t = time.time()
 
-        rCanvas.bind_all('<w>', self.launch_move_forward)
+        rCanvas.bind_all('<w>', self.launch_move_north)
         rCanvas.bind_all('<s>', self.launch_move_south)
         rCanvas.bind_all('<a>', self.launch_move_west)
         rCanvas.bind_all('<d>', self.launch_move_east)
         rCanvas.bind_all('<x>', self.stop_move)  
         rCanvas.pack()
+
 
     def launch_move_forward(self, event=None):
         move_fwd_thread = threading.Thread(target=self.move_forward)
@@ -236,6 +237,7 @@ class Joystick:
                     robot.set_wheel(1, self.vrobot.sr)
                 elif floor > 40 and seenBlack:
                     # stop
+                    time.sleep(0.3) # move a bit extra
                     self.vrobot.sl = 0
                     self.vrobot.sr = 0
                     robot.set_wheel(0, 0)
@@ -243,8 +245,8 @@ class Joystick:
                     break
                 else:
                     # turn right
-                    self.vrobot.sl = -15 * direction
-                    self.vrobot.sr = 15 * direction
+                    self.vrobot.sl = 15 * direction
+                    self.vrobot.sr = -15 * direction
                     robot.set_wheel(0, self.vrobot.sl)
                     robot.set_wheel(1, self.vrobot.sr)
 
@@ -298,7 +300,10 @@ class Joystick:
                 self.move_forward()
 
             elif direction == "SOUTH":
-                self.move_backward()
+                self.turn(1)
+                self.turn(1)
+                self.move_forward()
+                # self.move_backward()
 
             global lastMoveDirection
             lastMoveDirection = "NORTH"
@@ -308,7 +313,10 @@ class Joystick:
         if self.gRobotList: 
             robot = self.gRobotList[0]
             if direction == "NORTH":
-                self.move_backward()
+                self.turn(1)
+                self.turn(1)
+                self.move_forward()
+                # self.move_backward()
 
             elif direction == "EAST":
                 self.turn(1)
@@ -335,7 +343,10 @@ class Joystick:
                 self.move_forward()
 
             elif direction == "WEST":
-                self.move_backward()
+                self.turn(1)
+                self.turn(1)
+                self.move_forward()
+                # self.move_backward()
 
             elif direction == "SOUTH":
                 self.turn(-1)
@@ -352,7 +363,10 @@ class Joystick:
                 self.move_forward()
 
             elif direction == "EAST":
-                self.move_backward()
+                self.turn(1)
+                self.turn(1)
+                self.move_forward()
+                # self.move_backward()
 
             elif direction == "WEST":
                 self.move_forward()
