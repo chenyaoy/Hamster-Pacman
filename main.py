@@ -664,11 +664,9 @@ def main(argv=None):
     rectangles.append([90, -90, 30, -30])
     rectangles.append([100, 100, 140, 140])
     rectangles.append([-100, -100, -140, -140])
-    
 
     for rect in rectangles:
         vWorld.add_obstacle(rect)
-
 
     draw_world_thread = threading.Thread(target=draw_virtual_world, args=(vWorld, joystick))
     draw_world_thread.daemon = True
@@ -684,9 +682,6 @@ def main(argv=None):
 
     rCanvas.after(200, gui.updateCanvas, drawQueue)
     g.m.mainloop()
-
-    
-
 
     for robot in joystick.gRobotList:
         robot.reset()
