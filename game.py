@@ -127,9 +127,6 @@ class GameState():
             i = 0
             j = -1
 
-        # state.positions[agentIndex][0] += i
-        # state.positions[agentIndex][1] += j
-
         oldx, oldy = state.positions[agentIndex]
         state.positions[agentIndex] = (oldx + i, oldy + j)
 
@@ -138,7 +135,7 @@ class GameState():
         if agentIndex == 0:
             self.consume(state.positions[agentIndex], state)
 
-    def consume(self, position, state ):
+    def consume(self, position, state):
         x, y = position
 
         numFood = state.getNumFood()
@@ -150,7 +147,7 @@ class GameState():
             numFood -= 1
             state.setNumFood(numFood)
             
-        if numFood == 0 and not state.data._lose:
+        if numFood == 0 and not state.isLose():
             state.scoreChange += 500
             state.win = True
 
@@ -168,8 +165,7 @@ class GameState():
         return coordinates
 
     def get_coordinates(self, agentIndex):
-        x = self.positions[agentIndex][0]
-        y = self.positions[agentIndex][1]
+        x, y = self.positions[agentIndex]
         x_position = -120 + (60*x)
         y_position = -120 + (60*y)
         return (x_position, y_position)

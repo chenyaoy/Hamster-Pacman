@@ -98,17 +98,23 @@ class virtual_world:
         self.canvas_width = canvas_width
         self.canvas_height = canvas_height
         self.map = mp if mp is not None else []
-        self.pellets = None
+        self.pellets = []
         self.trace = trace #leave trace of robot
         self.prox_dots = prox_dots # draw obstacles detected as dots on map
         self.floor_dots = floor_dots
 
+    def add_pellet(self, pill):
+        self.pellets.append(pill)
+    
     def add_obstacle(self,rect):
         self.map.append(rect)
 
     def draw_rect(self, x1, y1, x2, y2):
         self.drawQueue.put(lambda: self.canvas.create_rectangle([x1,y1,x2,y2], fill=None))
         
+    def draw_pellet(self, x1, y1, x2, y2):
+        self.drawQueue.put(lambda: self.canvas.create_oval([x1, y1, x2, y2], fill='green'))
+    
     def draw_map(self):
         canvas_width = self.canvas_width
         canvas_height = self.canvas_height
@@ -118,6 +124,12 @@ class virtual_world:
             x2 = canvas_width + rect[2]
             y2 = canvas_height - rect[3]
             self.draw_rect(x1, y1, x2, y2)
+        for pill in self.pellets:
+            x1 = canvas_width + pill[0]
+            y1 = canvas_height - pill[1]
+            x2 = canvas_width + pill[2]
+            y2 = canvas_height - pill[3]
+            self.draw_pellet(x1,y1, x2, y2)
 
     def draw_robot(self, agentIndex):
         canvas_width = self.canvas_width
