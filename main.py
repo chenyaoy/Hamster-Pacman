@@ -33,7 +33,27 @@ class VirtualWorldGui:
         self.button9 = tk.Button(m,text="Exit")
         self.button9.pack(side='left')
         self.button9.bind('<Button-1>', stopProg)
+    
+        self.button4 = tk.Button(m, text="AI Mode")
+        self.button4.pack(side='left')
+        self.button4.bind('<Button-1>', self.AI_mode)
+        
+        
+        self.button5 = tk.Button(m, text="Human Mode")
+        self.button5.pack(side='left')
+        self.button5.bind('<Button-1>', self.Human_mode)
 
+    def AI_mode(self, event=None):
+        AI_thread = threading.Thread(target= AI_game)
+        AI_thread.daemon = True
+        AI_thread.start()
+    
+    
+    def Human_mode(self, event=None):
+        Human_thread= threading.Thread(target=human_game)
+        Human_thread.daemon = True
+        Human_thread.start()
+    
     def startNavigateThread(self, event=None):
         navigation_thread = threading.Thread(target=self.navigate)
         navigation_thread.daemon = True
@@ -401,6 +421,15 @@ class Joystick:
                 else:
                     self.vrobot.floor_r = False
             time.sleep(0.05)
+def human_game():
+    print "made it to human game"
+    # wait for console input
+    move = input("Input direction: ")
+    if move == "w":
+        print
+    elif move == "s":
+    elif move == "a":
+    elif move == "d":
 
 def nextGameTurn():
     # for each agent
@@ -436,11 +465,11 @@ def main(argv=None):
 
     drawQueue = Queue.Queue(0)
 
-    canvas_width = 700 # half width
-    canvas_height = 380 # half height
+    canvas_width = 500 #original: 700 # half width
+    canvas_height = 200 # original 380half height
     rCanvas = tk.Canvas(g.m, bg="white", width=canvas_width*2, height=canvas_height*2)
     joystick = Joystick(g.comm, g.m, rCanvas)
-
+    
     # # visual elements of the virtual robot 
     poly_points = [0,0,0,0,0,0,0,0]
     joystick.vrobot.poly_id = rCanvas.create_polygon(poly_points, fill='blue') #robot
@@ -454,7 +483,7 @@ def main(argv=None):
     update_vrobot_thread = threading.Thread(target=joystick.update_virtual_robot)
     update_vrobot_thread.daemon = True
     update_vrobot_thread.start()
-
+    
     #create the virtual worlds that contains the virtual robot
     vWorld = virtual_world(drawQueue, joystick.vrobot, rCanvas, canvas_width, canvas_height)
 
@@ -473,6 +502,7 @@ def main(argv=None):
 
     for rect in rectangles:
         vWorld.add_obstacle(rect)
+
 
     draw_world_thread = threading.Thread(target=draw_virtual_world, args=(vWorld, joystick))
     draw_world_thread.daemon = True
