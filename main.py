@@ -137,7 +137,7 @@ class Joystick:
             rightFloor = robot.get_floor(1)
 
             while not (leftFloor < 40 and rightFloor < 40):
-                print "while loop: floorleft %d floorright %d" % (leftFloor, rightFloor)
+                #print "while loop: floorleft %d floorright %d" % (leftFloor, rightFloor)
                 if rightFloor < 40: # right floor sensor sees black, robot turns right
                     self.vrobot.sl = 15
                     self.vrobot.sr = -15  
@@ -393,24 +393,28 @@ class Joystick:
                 else:
                     self.vrobot.floor_r = False
             time.sleep(0.05)
-def human_game():
+def human_action():
     print "w-for North \n s-for South \n a- for East \n d- for west"
     # wait for console input
     while True:
         move =  str(sys.stdin.readline())
-        if move[0] == ['w', 'W']:
-            print "move north"
         
+        if move[0] == ['w', 'W']:
+                
+            return "NORTH"
         elif move[0] in ["s", "S"]:
-            print "move south"
+            
+            return "SOUTH"
         elif move[0] in ["a", "A"]:
-            print "move west"
+            
+            return "WEST"
         elif move[0] in ["d", "D"]:
-            print "move east"
+            return "EAST"
         else:
-            print "done"
+            print "invalid input"
+            print "valid inputs:"
+            print "w-for North \n s-for South \n a- for East \n d- for west"
             continue
-
 
 def stopProg(event=None):
     g.m.quit()
@@ -429,17 +433,21 @@ def draw_virtual_world(virtual_world, joystick):
             virtual_world.draw_floor("right")
         time.sleep(0.1)
 
+
+
+
 # one run of this function corresponds to one 'turn' in the game
 # pacman and all ghosts move once, and game state is updated
 def nextTurn(gameState):
     move_threads = []
 
     currentState = gameState
-
+    
     for agentIndex in range(3):
+        print str(agentIndex) + str(currentState.get_position())
         legalActions = gameState.getLegalMoves(agentIndex)
         action = legalActions[random.randrange(0, len(legalActions))] # choose action randomly
-
+        
         currentState = currentState.generateSuccessor(agentIndex, action)
 
         if action == "North":
@@ -457,7 +465,8 @@ def nextTurn(gameState):
         moveThread.start()
 
         move_threads.append(moveThread)
-
+    
+    print currentState.get_all_coordinates()
     # wait for all three movements to be over
     for thread in move_threads:
         thread.join()
@@ -466,6 +475,9 @@ def nextTurn(gameState):
 
 # This is run on a separate thread from the main thread so that we can wait for moves to complete
 def run_game():
+    if human_mode:
+        human_game()
+    else:
     gameState = game.GameState()
     while not (game.isWin() or game.isLose()):
         # turnThread = threading.Thread(target=nextTurn, args=(gameState,))
@@ -551,8 +563,8 @@ def main(argv=None):
     rCanvas.after(200, gui.updateCanvas, drawQueue)
     g.m.mainloop()
 
-    # run_game_thread = threading.Thread(target=run_game)
-    # run_game_thread.start()
+    run_game_thread = threading.Thread(target=run_game)
+    run_game_thread.start()
 
 
     for robot in joystick.gRobotList:

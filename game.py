@@ -148,7 +148,8 @@ class GameState():
     def get_all_coordinates(self):
         coordinates = []
         for agentIndex in range(3):
-            coordinates.append(get_coordinates(agentIndex))
+            coordinates.append(self.get_coordinates(agentIndex))
+        return coordinates
 
     def get_coordinates(self, agentIndex):
         x = self.positions[agentIndex][0]
