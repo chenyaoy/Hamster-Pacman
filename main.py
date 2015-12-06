@@ -536,6 +536,17 @@ def nextTurn(gameState, gameMode):
         vAgent = joystick.vrobots[agentIndex]
         vAgent.x, vAgent.y = all_coords[agentIndex]
 
+        if currentState.directions[agentIndex] == "NORTH":
+            vAgent.a = 0
+        elif currentState.directions[agentIndex] == "EAST":
+            vAgent.a = math.pi / 2
+        elif currentState.directions[agentIndex] == "WEST":
+            vAgent.a = - (math.pi / 2)
+        elif currentState.directions[agentIndex] == "SOUTH":
+            vAgent.a = math.pi
+        else:
+            raise Exception("direction not in NSEW")
+
     return currentState
 
 
