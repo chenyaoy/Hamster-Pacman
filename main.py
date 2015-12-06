@@ -133,9 +133,9 @@ class Joystick:
             vrobot.sr = 15
 
 
-            robot.set_wheel(0, self.vrobot.sl)
-            robot.set_wheel(1, self.vrobot.sr)
-            time.sleep(0.5)
+            robot.set_wheel(0, vrobot.sl)
+            robot.set_wheel(1, vrobot.sr)
+            time.sleep(0.2)
 
             print "initial move forward"
 
@@ -154,8 +154,8 @@ class Joystick:
                 else:
                     vrobot.sl = 15
                     vrobot.sr = 15
-                robot.set_wheel(0, self.vrobot.sl)
-                robot.set_wheel(1, self.vrobot.sr)
+                robot.set_wheel(0, vrobot.sl)
+                robot.set_wheel(1, vrobot.sr)
 
                 time.sleep(0.01)
 
@@ -173,6 +173,7 @@ class Joystick:
     def turn(self, direction, robotIndex):
         ''' direction: -1 for left, 1 for right '''
         if self.gRobotList:
+            print "turning robot %d to the %s" % (robotIndex, "left" if direction == - 1 else "right")
             robot = self.gRobotList[robotIndex]
             vrobot = self.vrobots[robotIndex]
             leftFloor = robot.get_floor(0)
@@ -239,34 +240,34 @@ class Joystick:
             self.vrobot.t = time.time()  
 
     def launch_move_north(self, event=None, direction="NORTH", robotIndex=0):
-        print "launching move north"
+        print "launching move north", event, direction, robotIndex
         turn_right_thread = threading.Thread(target=self.move_north, args=(direction, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_south(self, event=None, direction="NORTH", robotIndex=0):
-        print "launching move south"
+        print "launching move south", event, direction, robotIndex
         turn_right_thread = threading.Thread(target=self.move_south, args=(direction, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_east(self, event=None, direction="NORTH", robotIndex=0):
-        print "launching move east"
+        print "launching move east", event, direction, robotIndex
         turn_right_thread = threading.Thread(target=self.move_east, args=(direction, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_west(self, event=None, direction="NORTH", robotIndex=0):
-        print "launching move west"
+        print "launching move west", event, direction, robotIndex
         turn_right_thread = threading.Thread(target=self.move_west, args=(direction, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def move_north(self, direction, robotIndex):
         if self.gRobotList:   
-            print "moving north:" 
-            print "direction: ", direction
-            print "robot index:", robotIndex
+            # print "moving north:" 
+            # print "direction: ", direction
+            # print "robot index:", robotIndex
             robot = self.gRobotList[robotIndex]
             vrobot = self.vrobots[robotIndex]
             if direction == "NORTH":
@@ -292,7 +293,7 @@ class Joystick:
 
     def move_south(self, direction, robotIndex):
         if self.gRobotList: 
-            print "moving south"
+            # print "moving south"
             robot = self.gRobotList[robotIndex]
             vrobot = self.vrobots[robotIndex]
             if direction == "NORTH":
@@ -317,7 +318,7 @@ class Joystick:
 
     def move_east(self, direction, robotIndex):
         if self.gRobotList: 
-            print "moving east"
+            # print "moving east"
             robot = self.gRobotList[robotIndex]
             vrobot = self.vrobots[robotIndex]
             if direction == "NORTH":
@@ -342,7 +343,7 @@ class Joystick:
 
     def move_west(self, direction, robotIndex):
         if self.gRobotList: 
-            print "moving west"
+            # print "moving west"
             robot = self.gRobotList[robotIndex]
             vrobot = self.vrobots[robotIndex]
             if direction == "NORTH":
@@ -692,10 +693,11 @@ def draw_virtual_world(virtual_world, joystick):
 def nextTurn(gameState, gameMode):
     move_threads = []
 
-    print "turn started"
-
     currentState = gameState
     
+    old_agent_directions = gameState.directions[:]
+    print "old directions: ", old_agent_directions
+
     for agentIndex in range(3):
 
         if gameMode == "Human" and agentIndex == 0:
@@ -717,7 +719,8 @@ def nextTurn(gameState, gameMode):
             move = joystick.launch_move_south
     
         # TODO - which robot do we move
-        moveThread = threading.Thread(target=move, args=(None, gameState.directions[agentIndex], agentIndex)) # the none is the event thing
+        print "moving robot %d to the %s" % (agentIndex, action)
+        moveThread = threading.Thread(target=move, args=(None, old_agent_directions[agentIndex], agentIndex)) # the none is the event thing
         moveThread.daemon = True
         moveThread.start()
 
@@ -730,8 +733,6 @@ def nextTurn(gameState, gameMode):
     # wait for all three movements to be over
     for thread in move_threads:
         thread.join()
-
-    print "turn finished"
 
     return currentState
 
@@ -754,6 +755,7 @@ def run_game(gameMode):
 
         # multithreading unnecessary for this part? it can be blocked since it's not main thread 
         # and doesn't need to do anything else
+        print "gamestate directions: ", gameState.directions
         gameState = nextTurn(gameState, gameMode)
 
     if gameState.isWin():
