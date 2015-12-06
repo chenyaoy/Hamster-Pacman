@@ -401,20 +401,20 @@ def human_turn():
     while True:
         move = str(sys.stdin.readline())[0].lower()
 
-        if move in ["w", "west]:
-            action = "West"
+        if move in ["w", "west"]:
+            action = "WEST"
             print "move west"
             break
         elif move in ["s", "south"]:
-            action = "South"
+            action = "SOUTH"
             print "move south"
             break
         elif move in ["n", "north"]:
-            action = "North"
+            action = "NORTH"
             print "move north"
             break
         elif move in ["e", "east"]:
-            action = "East"
+            action = "EAST"
             print "move east"
             break
         else:
@@ -578,13 +578,13 @@ def nextTurn(gameState, gameMode):
 
         currentState = currentState.generateSuccessor(agentIndex, action)
 
-        if action == "North":
+        if action == "NORTH":
             move = launch_move_north
-        elif action == "East":
+        elif action == "EAST":
             move = launch_move_east
-        elif action == "West":
+        elif action == "WEST":
             move = launch_move_west
-        elif action == "South":
+        elif action == "SOUTH":
             move = launch_move_south
     
         # TODO - which robot do we move
