@@ -136,7 +136,7 @@ class Joystick:
 
             robot.set_wheel(0, vrobot.sl)
             robot.set_wheel(1, vrobot.sr)
-            time.sleep(0.2)
+            time.sleep(0.5)
 
             print "initial move forward"
 
@@ -540,6 +540,17 @@ def nextTurn(gameState, gameMode):
     for agentIndex in range(3):
         vAgent = joystick.vrobots[agentIndex]
         vAgent.x, vAgent.y = all_coords[agentIndex]
+
+        if currentState.directions[agentIndex] == "NORTH":
+            vAgent.a = 0
+        elif currentState.directions[agentIndex] == "EAST":
+            vAgent.a = math.pi / 2
+        elif currentState.directions[agentIndex] == "WEST":
+            vAgent.a = - (math.pi / 2)
+        elif currentState.directions[agentIndex] == "SOUTH":
+            vAgent.a = math.pi
+        else:
+            raise Exception("direction not in NSEW")
 
     return currentState
 
