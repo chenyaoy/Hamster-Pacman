@@ -7,8 +7,10 @@ from tk_hamster_GUI import *
 import numpy as np
 import globalVars as g
 import graphics
-import game
+
+import game, sys
 import random
+
 
 UPDATE_INTERVAL = 30
 
@@ -35,7 +37,27 @@ class VirtualWorldGui:
         self.button9 = tk.Button(m,text="Exit")
         self.button9.pack(side='left')
         self.button9.bind('<Button-1>', stopProg)
+    
+        self.button4 = tk.Button(m, text="AI Mode")
+        self.button4.pack(side='left')
+        self.button4.bind('<Button-1>', self.AI_mode)
+        
+        
+        self.button5 = tk.Button(m, text="Human Mode")
+        self.button5.pack(side='left')
+        self.button5.bind('<Button-1>', self.Human_mode)
 
+    def AI_mode(self, event=None):
+        AI_thread = threading.Thread(target= AI_game)
+        AI_thread.daemon = True
+        AI_thread.start()
+    
+    
+    def Human_mode(self, event=None):
+        Human_thread= threading.Thread(target=human_game)
+        Human_thread.daemon = True
+        Human_thread.start()
+    
     def startNavigateThread(self, event=None):
         navigation_thread = threading.Thread(target=self.navigate)
         navigation_thread.daemon = True
@@ -89,10 +111,12 @@ class Joystick:
         self.vrobot = virtual_robot()
         self.vrobot.t = time.time()
 
+
         rCanvas.bind_all('<w>', self.launch_move_north)
         rCanvas.bind_all('<s>', self.launch_move_south)
         rCanvas.bind_all('<a>', self.launch_move_west)
         rCanvas.bind_all('<d>', self.launch_move_east)
+
         rCanvas.bind_all('<x>', self.stop_move)  
         rCanvas.pack()
 
@@ -369,6 +393,23 @@ class Joystick:
                 else:
                     self.vrobot.floor_r = False
             time.sleep(0.05)
+def human_game():
+    print "w-for North \n s-for South \n a- for East \n d- for west"
+    # wait for console input
+    while True:
+        move =  str(sys.stdin.readline())
+        if move[0] == ['w', 'W']:
+            print "move north"
+        
+        elif move[0] in ["s", "S"]:
+            print "move south"
+        elif move[0] in ["a", "A"]:
+            print "move west"
+        elif move[0] in ["d", "D"]:
+            print "move east"
+        else:
+            print "done"
+            continue
 
 
 def stopProg(event=None):
@@ -432,7 +473,7 @@ def nextTurn(gameState):
             move = launch_move_west
         elif action == "South":
             move = launch_move_south
-
+    
         # TODO - which robot do we move
         moveThread = threading.Thread(target=move, args=(direction, None, agentIndex)) # the none is the event thing
         moveThread.daemon = True
@@ -479,12 +520,14 @@ def main(argv=None):
 
     drawQueue = Queue.Queue(0)
 
-    canvas_width = 700 # half width
-    canvas_height = 380 # half height
+    canvas_width = 500 #original: 700 # half width
+    canvas_height = 200 # original 380half height
     rCanvas = tk.Canvas(g.m, bg="white", width=canvas_width*2, height=canvas_height*2)
     joystick = Joystick(g.comm, g.m, rCanvas)
 
-    # visual elements of the virtual robot 
+
+
+    # visual elements of the virtual robot
     poly_points = [0,0,0,0,0,0,0,0]
     joystick.vrobot.poly_id = rCanvas.create_polygon(poly_points, fill='blue') #robot
     joystick.vrobot.prox_l_id = rCanvas.create_line(0,0,0,0, fill="red") #prox sensors
@@ -498,7 +541,8 @@ def main(argv=None):
     update_vrobot_thread.daemon = True
     update_vrobot_thread.start()
 
-    # create the virtual worlds that contains the virtual robot
+    #create the virtual worlds that contains the virtual robot
+
     vWorld = virtual_world(drawQueue, joystick.vrobot, rCanvas, canvas_width, canvas_height)
 
     ''' objects in the world '''
@@ -510,9 +554,13 @@ def main(argv=None):
     rectangles.append([90, 90, 30, 30])
     rectangles.append([-90, -90, -30, -30])
     rectangles.append([90, -90, 30, -30])
+    rectangles.append([100, 100, 140, 140])
+    rectangles.append([-100, -100, -140, -140])
     
+
     for rect in rectangles:
         vWorld.add_obstacle(rect)
+
 
     draw_world_thread = threading.Thread(target=draw_virtual_world, args=(vWorld, joystick))
     draw_world_thread.daemon = True

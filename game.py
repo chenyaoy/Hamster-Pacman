@@ -124,7 +124,7 @@ class GameState():
 
         state.positions[agentIndex][0] += i
         state.positions[agentIndex][1] += j
-
+        
         if agentIndex == 0:
             consume(state.positions[agentIndex], state)
 
@@ -145,6 +145,18 @@ class GameState():
             state.pills.remove(position)
           # remove from virtual map
 
+    def get_all_coordinates(self):
+        coordinates = []
+        for agentIndex in range(3):
+            coordinates.append(get_coordinates(agentIndex))
+
+    def get_coordinates(self, agentIndex):
+        x = self.positions[agentIndex][0]
+        y = self.positions[agentIndex][1]
+        x_position = -120 + (60*x)
+        y_position = 120 - (60*y)
+        return (x_position, y_position)
+    
     def getPills(self):
         return self.pills
 
