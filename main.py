@@ -394,6 +394,8 @@ def draw_virtual_world(virtual_world, joystick):
         time.sleep(0.1)
 
 def nextTurn(gameState):
+    move_threads = []
+
     for agentIndex in range(3):
         legalActions = game.getLegalMoves(agentIndex)
         action = legalActions[0]
@@ -409,12 +411,18 @@ def nextTurn(gameState):
         elif action == "South":
             move = launch_move_south
 
-        moveThread = threading.Thread(target=move, args=(direction))
+
+        moveThread = threading.Thread(target=move, args=(direction,))
         moveThread.daemon = True
         moveThread.start()
 
+        move_threads.append(moveThread)
 
-def run():
+    for thread in move_threads:
+        thread.join()
+
+
+def run_game():
     gameState = game.GameState()
     while not (game.isWin() or game.isLose()):
         turnThread = threading.Thread(target=nextTurn, args=(gameState))
