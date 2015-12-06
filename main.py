@@ -7,6 +7,7 @@ from tk_hamster_GUI import *
 import numpy as np
 import globalVars as g
 import graphics
+import game
 
 UPDATE_INTERVAL = 30
 
@@ -143,15 +144,6 @@ class Joystick:
         rCanvas.bind_all('<x>', self.stop_move)  
         rCanvas.pack()
 
-    def launch_move_forward(self, event=None):
-        move_fwd_thread = threading.Thread(target=self.move_forward)
-        move_fwd_thread.daemon = True
-        move_fwd_thread.start()
-        print "move fwd thread started"
-        # move_fwd_thread.join()
-        print "move fwd thread finished"
-
-
     def move_forward(self):
         if self.gRobotList:
             robot = self.gRobotList[0]
@@ -229,7 +221,6 @@ class Joystick:
             while True:
                 if floor < 40:
                     seenBlack = True
-                    # turn right
                     self.vrobot.sl = 15 * direction
                     self.vrobot.sr = -15 * direction
                     robot.set_wheel(0, self.vrobot.sl)
@@ -242,9 +233,8 @@ class Joystick:
                     robot.set_wheel(1, 0)
                     break
                 else:
-                    # turn right
-                    self.vrobot.sl = -15 * direction
-                    self.vrobot.sr = 15 * direction
+                    self.vrobot.sl = 15 * direction
+                    self.vrobot.sr = -15 * direction
                     robot.set_wheel(0, self.vrobot.sl)
                     robot.set_wheel(1, self.vrobot.sr)
 
@@ -427,6 +417,35 @@ def draw_virtual_world(virtual_world, joystick):
             virtual_world.draw_floor("right")
         time.sleep(0.1)
 
+def nextTurn(gameState):
+    for agentIndex in range(3):
+        legalActions = game.getLegalMoves(agentIndex)
+        action = legalActions[0]
+
+        successor = gameState.generateSuccessor(agentIndex, action)
+
+        if action == "North":
+            move = launch_move_north
+        elif action == "East":
+            move = launch_move_east
+        elif action == "West":
+            move = launch_move_west
+        elif action == "South":
+            move = launch_move_south
+
+        moveThread = threading.Thread(target=move, args=(direction))
+        moveThread.daemon = True
+        moveThread.start()
+
+
+def run():
+    gameState = game.GameState()
+    while not (game.isWin() or game.isLose()):
+        turnThread = threading.Thread(target=nextTurn, args=(gameState))
+        turnThread.daemon = True
+        turnThread.start()
+
+    return game.score
 
 def main(argv=None): 
     global sleepTime
@@ -482,6 +501,8 @@ def main(argv=None):
 
     rCanvas.after(200, gui.updateCanvas, drawQueue)
     g.m.mainloop()
+
+    run()    
 
     for robot in joystick.gRobotList:
         robot.reset()

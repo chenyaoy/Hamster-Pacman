@@ -20,7 +20,7 @@ class Grid():
         print "\n".join("\t".join(map(str,l)) for l in grid)
 
 
-class GameStateData():
+class GameState():
     def __init__(self, prevState = None):
         self.lose = False
         self.win = False
