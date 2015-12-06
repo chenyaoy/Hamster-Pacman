@@ -10,9 +10,11 @@ import game
 import random
 
 UPDATE_INTERVAL = 30
+BOARD_SIZE = 5
 gMaxRobotNum = 3 # max number of robots to control
 gQuit = False
 m = None
+
 
 class VirtualWorldGui:
     def __init__(self, vWorld, m):
@@ -130,10 +132,9 @@ class Joystick:
             vrobot.sl = 15
             vrobot.sr = 15
 
-
             robot.set_wheel(0, vrobot.sl)
             robot.set_wheel(1, vrobot.sr)
-            time.sleep(0.2)
+            time.sleep(0.5)
 
             print "initial move forward"
 
@@ -225,7 +226,6 @@ class Joystick:
 
                 floor = robot.get_floor(floorDir)
             
-
     def stop_move(self, event=None):
         if self.gRobotList: 
             robot = self.gRobotList[0]
@@ -263,7 +263,7 @@ class Joystick:
     def move_north(self, direction, robotIndex):
         if self.gRobotList:   
             # print "moving north:" 
-            # print "direction: ", direction
+            # print "last direction: ", direction
             # print "robot index:", robotIndex
             robot = self.gRobotList[robotIndex]
             vrobot = self.vrobots[robotIndex]
@@ -362,7 +362,6 @@ class Joystick:
 
             global lastMoveDirection
             lastMoveDirection = "WEST"
-
 
     def update_all_virtual_robots(self):
         while not gQuit:
@@ -523,7 +522,6 @@ def nextTurn(gameState, gameMode):
     for thread in move_threads:
         thread.join()
 
-
     if currentState.boostTimer > 0:
         currentState.boostTimer -= 1
     print "turn finished"
@@ -630,17 +628,14 @@ def main(argv=None):
     rectangles.append([-100, -100, -140, -140])
 
     #pacman pellets/capsules/food
-    for index_x in range(5):
-        for index_y in range(5):
+    for index_x in range(BOARD_SIZE):
+        for index_y in range(BOARD_SIZE):
             x_position = -120 + (60*index_x)
             y_position = 120 - (60*index_y)
             if (index_x == 0 and index_y == 0) or (index_x == 4 and index_y == 4):
                 new_pellet = [(x_position - 25), (y_position + 25), (x_position+25), (y_position-25)]
             elif not ((index_x == 0 and index_y == 4) or (index_x ==2 and index_y == 2) or (index_x ==4 and index_y ==4) or (index_x == 1 and index_y == 1) or (index_x == 3 and index_y == 1) or (index_x == 1 and index_y == 3) or (index_x==3 and index_y==3)):
                 [(x_position - 10), (y_position +10), (x_position +10), (x_position+10)]
-
-
-
 
 
     for rect in rectangles:
