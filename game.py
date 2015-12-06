@@ -86,7 +86,7 @@ class GameState():
                 if i == 0 and j == -1:
                     legalMoves.append("SOUTH")
                 if i == 0 and j == 1:
-                    legalMoves.append("NORTHs")
+                    legalMoves.append("NORTH")
         return legalMoves
 
     def generateSuccessor(self, agentIndex, action):
@@ -139,11 +139,16 @@ class GameState():
 
     def consume(self, position, state ):
         x, y = position
+
+        numFood = state.getNumFood()
+
         # Eat food
         if state.food[x][y]:
             state.scoreChange += 10
             state.food[x][y] = False
-            numFood = state.getNumFood()
+            numFood -= 1
+            state.setNumFood(numFood)
+            
         if numFood == 0 and not state.data._lose:
             state.scoreChange += 500
             state.win = True
@@ -172,6 +177,9 @@ class GameState():
 
     def getNumFood(self):
         return self.numFood
+
+    def setNumFood(self, newFood):
+        self.numFood = newFood
 
     def isWin(self):
         return self.win
