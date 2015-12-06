@@ -25,11 +25,20 @@ import math
 import Queue
 
 class virtual_robot:
-    def __init__(self):
+    def __init__(self, agentIndex):
         #self.robot = None
+        if agentIndex == 0:
+            self.x = 0 # x coordinate
+            self.y = 0 # y coordinate
+        elif agentIndex == 1: #ghost 1 (Blinky)
+            self.x = 120 # x coordinate
+            self.y = 120 # y coordinate
+        elif agentIndex ==2: #ghost 2 (Inky)
+            self.x = -120
+            self.y = -120
+        
         self.l = 20*math.sqrt(2) # half diagonal - robot is 40 mm square
-        self.x = 0 # x coordinate
-        self.y = 0 # y coordinate
+        
         self.a = 0 # angle of the robot, 0 when aligned with verticle axis
         self.dist_l = False
         self.dist_r = False #distance
@@ -42,9 +51,17 @@ class virtual_robot:
         self.localization_y_points = []
         self.previous_a = 0
 
-    def reset_robot(self):
-        self.x = 0 # x coordinate
-        self.y = 0 # y coordinate
+    def reset_robots(self, agentIndex):
+        if agentIndex == 0:
+            self.x = 0 # x coordinate
+            self.y = 0 # y coordinate
+        elif agentIndex == 1: #ghost 1 (Blinky)
+            self.x = 120 # x coordinate
+            self.y = 120 # y coordinate
+        elif agentIndex ==2: #ghost 2 (Inky)
+            self.x = -120
+            self.y = -120
+        
         self.a = 0 # angle of the robot, 0 when aligned with verticle axis
         self.dist_l = False
         self.dist_r = False
@@ -72,11 +89,11 @@ class virtual_robot:
         self.floor_r = floor_r
 
 class virtual_world:
-    def __init__(self, drawQueue, vrobot=None, canvas=None, canvas_width=0,
+    def __init__(self, drawQueue, vrobots=None, canvas=None, canvas_width=0,
                  canvas_height=0, mp=None, trace=False, prox_dots=False,
                  floor_dots=False):
         self.drawQueue = drawQueue
-        self.vrobot = vrobot
+        self.vrobots = vrobots
         self.canvas = canvas
         self.canvas_width = canvas_width
         self.canvas_height = canvas_height
@@ -101,11 +118,11 @@ class virtual_world:
             y2 = canvas_height - rect[3]
             self.draw_rect(x1, y1, x2, y2)
 
-    def draw_robot(self):
+    def draw_robot(self, agentIndex):
         canvas_width = self.canvas_width
         canvas_height = self.canvas_height
         pi4 = 3.1415 / 4 # quarter pi
-        vrobot = self.vrobot
+        vrobot = self.vrobots[agentIndex]
         a1 = vrobot.a + pi4
         a2 = vrobot.a + 3*pi4
         a3 = vrobot.a + 5*pi4
@@ -138,10 +155,10 @@ class virtual_world:
             y3 = canvas_height - 3 * math.cos(a3) - vrobot.y
             self.drawQueue.put(lambda: self.canvas.create_polygon([x1,y1,x2,y2,x3,y3], outline="blue"))
 
-    def draw_prox(self, side):
+    def draw_prox(self, side, agentIndex):
         canvas_width = self.canvas_width
         canvas_height = self.canvas_height
-        vrobot = self.vrobot
+        vrobot = self.vrobots[agentIndex]
         if (side == "left"):
             a_e = vrobot.a - 3.1415/5 #emitter location
             prox_dis = vrobot.dist_l
@@ -163,10 +180,10 @@ class virtual_world:
             points = (0,0,0,0)
             self.drawQueue.put(lambda: self.canvas.coords(prox_l_id, points))
 
-    def draw_floor(self, side):
+    def draw_floor(self, side, agentIndex):
         canvas_width = self.canvas_width
         canvas_height = self.canvas_height
-        vrobot = self.vrobot
+        vrobot = self.vrobots[agentIndex]
         if (side == "left"):
             border = vrobot.floor_l
             floor_id = vrobot.floor_l_id
