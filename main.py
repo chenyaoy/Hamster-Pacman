@@ -183,8 +183,8 @@ class Joystick:
             while not (leftFloor > 40 and rightFloor > 40):
                 vrobot.sl = 15
                 vrobot.sr = 15
-                robot.set_wheel(0, self.vrobot.sl)
-                robot.set_wheel(1, self.vrobot.sr)
+                robot.set_wheel(0, vrobot.sl)
+                robot.set_wheel(1, vrobot.sr)
                 leftFloor = robot.get_floor(0)
                 rightFloor = robot.get_floor(1)
                 time.sleep(0.01)
@@ -208,8 +208,8 @@ class Joystick:
                     seenBlack = True
                     vrobot.sl = 15 * direction
                     vrobot.sr = -15 * direction
-                    robot.set_wheel(0, self.vrobot.sl)
-                    robot.set_wheel(1, self.vrobot.sr)
+                    robot.set_wheel(0, vrobot.sl)
+                    robot.set_wheel(1, vrobot.sr)
                 elif floor > 40 and seenBlack:
                     # stop
                     time.sleep(0.2) # move a bit extra
@@ -221,8 +221,8 @@ class Joystick:
                 else:
                     vrobot.sl = 15 * direction
                     vrobot.sr = -15 * direction
-                    robot.set_wheel(0, self.vrobot.sl)
-                    robot.set_wheel(1, self.vrobot.sr)
+                    robot.set_wheel(0, vrobot.sl)
+                    robot.set_wheel(1, vrobot.sr)
 
                 time.sleep(0.01)
 
