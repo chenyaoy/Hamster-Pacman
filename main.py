@@ -471,6 +471,7 @@ one run of this function corresponds to one 'turn' in the game
 pacman and all ghosts move once, and game state is updated
 '''
 def nextTurn(gameState, gameMode):
+
     move_threads = []
 
     currentState = gameState
@@ -478,7 +479,6 @@ def nextTurn(gameState, gameMode):
     old_agent_directions = gameState.directions[:]
     print "old directions: ", old_agent_directions
 
-    for agentIndex in range(3):
 
     def move(currentState, agentIndex):
         legalActions = gameState.getLegalMoves(agentIndex)
@@ -530,6 +530,15 @@ def nextTurn(gameState, gameMode):
         currentState.boostTimer -= 1
     print "turn finished"
 
+    print "\n\nFOR THIS TURN:"
+    print "coordinates: ", currentState.get_all_coordinates()
+    print "\n\n"
+
+    all_coords = currentState.get_all_coordinates()
+
+    for agentIndex in range(3):
+        vAgent = joystick.vrobots[agentIndex]
+        vAgent.x, vAgent.y = all_coords[agentIndex]
 
     return currentState
 

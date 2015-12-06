@@ -157,7 +157,7 @@ class GameState():
         # Eat capsule
         if position in state.getPills():
             # speed boost
-            state.boostTimer = 10
+            state.boostTimer = 3
             state.pills.remove(position)
           # remove from virtual map
 
