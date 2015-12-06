@@ -7,6 +7,7 @@ from tk_hamster_GUI import *
 import numpy as np
 import globalVars as g
 import graphics
+import game
 
 UPDATE_INTERVAL = 30
 
@@ -62,55 +63,6 @@ class VirtualWorldGui:
     def resetvRobot(self, event=None):
         self.vworld.vrobot.reset_robot()
 
-    def leastSquares(self, xvalues, yvalues):
-        x = np.array(xvalues)
-        y = np.array(yvalues)
-        A = np.vstack([x, np.ones(len(x))]).T 
-        m, c = np.linalg.lstsq(A, y)[0]
-        return (m, c)
-
-    def localize(self, face, boundary):
-        robot = self.vworld.vrobot
-        localization_x_points = robot.localization_x_points
-        localization_y_points = robot.localization_y_points
-        while len(localization_x_points) <= 10 and len(localization_y_points) <= 10:
-            localization_x_points.append(0)
-            localization_y_points.append(robot.dist_l)
-            localization_x_points.append(40)
-            localization_y_points.append(robot.dist_r)
-            time.sleep(0.02)
-
-        m, b = self.leastSquares(localization_x_points, localization_y_points)
-        theta = math.degrees(math.atan(m))
-        # print "theta:", theta
-        
-        currentAngle = math.degrees(self.vworld.vrobot.a) % 360
-        
-        angle_difference = math.degrees(robot.a - robot.previous_a) % 360
-        # print "newBoxIndex", robot.facing_box_index
-        # print "angle difference:", angle_difference
-
-        proximity_avg = (robot.dist_r + robot.dist_l) / float(2)
-        distance_from_robot_center = proximity_avg + 20 # 20 is half the length of the robot
-
-        if face == "top":
-            self.vworld.vrobot.a = math.radians(theta)
-            self.vworld.vrobot.y = boundary - math.cos(math.radians(theta)) * distance_from_robot_center
-        if face == "bottom":
-            self.vworld.vrobot.a = math.radians(theta + 180)
-            self.vworld.vrobot.y = boundary + math.cos(math.radians(theta)) * distance_from_robot_center
-        if face == "right":
-            self.vworld.vrobot.a = math.radians(theta + 270)
-            self.vworld.vrobot.x = boundary + math.cos(math.radians(theta)) * distance_from_robot_center
-        if face == "left":
-            self.vworld.vrobot.a = math.radians(theta + 90)
-            self.vworld.vrobot.x = boundary - math.cos(math.radians(theta)) * distance_from_robot_center
-
-        self.vworld.vrobot.previous_a = self.vworld.vrobot.a
-
-        self.vworld.vrobot.localization_x_points = []
-        self.vworld.vrobot.localization_y_points = []
-
     def drawMap(self, event=None):
         self.vworld.draw_map()
 
@@ -156,21 +108,14 @@ class Joystick:
         self.vrobot = virtual_robot()
         self.vrobot.t = time.time()
 
-        rCanvas.bind_all('<w>', self.launch_move_forward)
-        # rCanvas.bind_all('<s>', self.move_down)
-        # rCanvas.bind_all('<a>', self.move_left)
-        #rCanvas.bind_all('<d>', self.launch_turn)
+
+        rCanvas.bind_all('<w>', self.launch_move_north)
+        rCanvas.bind_all('<s>', self.launch_move_south)
+        rCanvas.bind_all('<a>', self.launch_move_west)
+        rCanvas.bind_all('<d>', self.launch_move_east)
+
         rCanvas.bind_all('<x>', self.stop_move)  
         rCanvas.pack()
-
-    def launch_move_forward(self, event=None):
-        move_fwd_thread = threading.Thread(target=self.move_forward)
-        move_fwd_thread.daemon = True
-        move_fwd_thread.start()
-        print "move fwd thread started"
-        # move_fwd_thread.join()
-        print "move fwd thread finished"
-
 
     def move_forward(self):
         if self.gRobotList:
@@ -249,22 +194,21 @@ class Joystick:
             while True:
                 if floor < 40:
                     seenBlack = True
-                    # turn right
                     self.vrobot.sl = 15 * direction
                     self.vrobot.sr = -15 * direction
                     robot.set_wheel(0, self.vrobot.sl)
                     robot.set_wheel(1, self.vrobot.sr)
                 elif floor > 40 and seenBlack:
                     # stop
+                    time.sleep(0.2) # move a bit extra
                     self.vrobot.sl = 0
                     self.vrobot.sr = 0
                     robot.set_wheel(0, 0)
                     robot.set_wheel(1, 0)
                     break
                 else:
-                    # turn right
-                    self.vrobot.sl = -15 * direction
-                    self.vrobot.sr = 15 * direction
+                    self.vrobot.sl = 15 * direction
+                    self.vrobot.sr = -15 * direction
                     robot.set_wheel(0, self.vrobot.sl)
                     robot.set_wheel(1, self.vrobot.sr)
 
@@ -283,26 +227,26 @@ class Joystick:
             self.vrobot.t = time.time()  
 
     def launch_move_north(self, event=None):
-        turn_right_thread = threading.Thread(target=self.move_north)
+        turn_right_thread = threading.Thread(target=self.move_north, args=(lastMoveDirection,))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_south(self, event=None):
-        turn_right_thread = threading.Thread(target=self.move_south)
+        turn_right_thread = threading.Thread(target=self.move_south, args=(lastMoveDirection,))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_east(self, event=None):
-        turn_right_thread = threading.Thread(target=self.move_east)
+        turn_right_thread = threading.Thread(target=self.move_east, args=(lastMoveDirection,))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_west(self, event=None):
-        turn_right_thread = threading.Thread(target=self.move_west)
+        turn_right_thread = threading.Thread(target=self.move_west, args=(lastMoveDirection,))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
-    def move_north(self, direction, event=None):
+    def move_north(self, direction):
         if self.gRobotList:   
             robot = self.gRobotList[0]
 
@@ -318,14 +262,23 @@ class Joystick:
                 self.move_forward()
 
             elif direction == "SOUTH":
-                self.move_backward()
+                self.turn(1)
+                self.turn(1)
+                self.move_forward()
+                # self.move_backward()
+
+            global lastMoveDirection
+            lastMoveDirection = "NORTH"
 
 
-    def move_south(self, event=None):
+    def move_south(self, direction):
         if self.gRobotList: 
             robot = self.gRobotList[0]
             if direction == "NORTH":
-                self.move_backward()
+                self.turn(1)
+                self.turn(1)
+                self.move_forward()
+                # self.move_backward()
 
             elif direction == "EAST":
                 self.turn(1)
@@ -338,7 +291,10 @@ class Joystick:
             elif direction == "SOUTH":
                 self.move_forward()
 
-    def move_east(self, event=None):
+            global lastMoveDirection
+            lastMoveDirection = "SOUTH"
+
+    def move_east(self, direction):
         if self.gRobotList: 
             robot = self.gRobotList[0]
             if direction == "NORTH":
@@ -349,13 +305,19 @@ class Joystick:
                 self.move_forward()
 
             elif direction == "WEST":
-                self.move_backward()
+                self.turn(1)
+                self.turn(1)
+                self.move_forward()
+                # self.move_backward()
 
             elif direction == "SOUTH":
                 self.turn(-1)
                 self.move_forward()
 
-    def move_west(self, event=None):
+            global lastMoveDirection
+            lastMoveDirection = "EAST"
+
+    def move_west(self, direction):
         if self.gRobotList: 
             robot = self.gRobotList[0]
             if direction == "NORTH":
@@ -363,7 +325,10 @@ class Joystick:
                 self.move_forward()
 
             elif direction == "EAST":
-                self.move_backward()
+                self.turn(1)
+                self.turn(1)
+                self.move_forward()
+                # self.move_backward()
 
             elif direction == "WEST":
                 self.move_forward()
@@ -371,6 +336,9 @@ class Joystick:
             elif direction == "SOUTH":
                 self.turn(1)
                 self.move_forward()
+
+            global lastMoveDirection
+            lastMoveDirection = "WEST"
 
 
     def update_virtual_robot(self):
@@ -456,12 +424,53 @@ def draw_virtual_world(virtual_world, joystick):
             virtual_world.draw_floor("right")
         time.sleep(0.1)
 
+def nextTurn(gameState):
+    move_threads = []
+
+    for agentIndex in range(3):
+        legalActions = game.getLegalMoves(agentIndex)
+        action = legalActions[0]
+
+        successor = gameState.generateSuccessor(agentIndex, action)
+
+        if action == "North":
+            move = launch_move_north
+        elif action == "East":
+            move = launch_move_east
+        elif action == "West":
+            move = launch_move_west
+        elif action == "South":
+            move = launch_move_south
+
+
+        moveThread = threading.Thread(target=move, args=(direction,))
+        moveThread.daemon = True
+        moveThread.start()
+
+        move_threads.append(moveThread)
+
+    for thread in move_threads:
+        thread.join()
+
+
+def run_game():
+    gameState = game.GameState()
+    while not (game.isWin() or game.isLose()):
+        turnThread = threading.Thread(target=nextTurn, args=(gameState))
+        turnThread.daemon = True
+        turnThread.start()
+
+    return game.score
 
 def main(argv=None): 
     global sleepTime
     sleepTime = 0.01
     g.comm.start()
+    
     print 'Bluetooth starts'
+
+    global lastMoveDirection
+    lastMoveDirection = "NORTH"
 
     drawQueue = Queue.Queue(0)
 
@@ -515,6 +524,8 @@ def main(argv=None):
 
     rCanvas.after(200, gui.updateCanvas, drawQueue)
     g.m.mainloop()
+
+    run()    
 
     for robot in joystick.gRobotList:
         robot.reset()
