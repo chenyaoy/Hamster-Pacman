@@ -157,7 +157,7 @@ class GameState():
         # Eat capsule
         if position in state.getPills():
             # speed boost
-            state.boostTimer = 10
+            state.boostTimer = 3
             state.pills.remove(position)
           # remove from virtual map
 
@@ -171,7 +171,7 @@ class GameState():
         x = self.positions[agentIndex][0]
         y = self.positions[agentIndex][1]
         x_position = -120 + (60*x)
-        y_position = 120 - (60*y)
+        y_position = -120 + (60*y)
         return (x_position, y_position)
     
     def getPills(self):

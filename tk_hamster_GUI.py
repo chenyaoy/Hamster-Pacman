@@ -98,6 +98,7 @@ class virtual_world:
         self.canvas_width = canvas_width
         self.canvas_height = canvas_height
         self.map = mp if mp is not None else []
+        self.pellets = None
         self.trace = trace #leave trace of robot
         self.prox_dots = prox_dots # draw obstacles detected as dots on map
         self.floor_dots = floor_dots

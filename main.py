@@ -369,8 +369,9 @@ class Joystick:
             while not len(self.gRobotList) < 3:
                 print "waiting for robot to connect"
                 time.sleep(0.1)
+            print self.gRobotList
             for agentIndex in range(3):
-                update_virtual_robot(agentIndex)
+                self.update_virtual_robot(agentIndex)
 
     def update_virtual_robot(self, robotIndex):
         noise_prox = 25 # noisy level for proximity
@@ -468,6 +469,7 @@ one run of this function corresponds to one 'turn' in the game
 pacman and all ghosts move once, and game state is updated
 '''
 def nextTurn(gameState, gameMode):
+
     move_threads = []
 
     currentState = gameState
@@ -475,7 +477,6 @@ def nextTurn(gameState, gameMode):
     old_agent_directions = gameState.directions[:]
     print "old directions: ", old_agent_directions
 
-    for agentIndex in range(3):
 
     def move(currentState, agentIndex):
         legalActions = gameState.getLegalMoves(agentIndex)
@@ -527,6 +528,15 @@ def nextTurn(gameState, gameMode):
         currentState.boostTimer -= 1
     print "turn finished"
 
+    print "\n\nFOR THIS TURN:"
+    print "coordinates: ", currentState.get_all_coordinates()
+    print "\n\n"
+
+    all_coords = currentState.get_all_coordinates()
+
+    for agentIndex in range(3):
+        vAgent = joystick.vrobots[agentIndex]
+        vAgent.x, vAgent.y = all_coords[agentIndex]
 
     return currentState
 
@@ -608,8 +618,9 @@ def main(argv=None):
 
     ''' objects in the world '''
     rectangles = []
-
-    # pacman map
+    pellets = []
+    
+    # pacman map/walls
     rectangles.append([-150, -150, 150, 150]) #overall square
     rectangles.append([-90, 90, -30, 30])
     rectangles.append([90, 90, 30, 30])
@@ -617,6 +628,20 @@ def main(argv=None):
     rectangles.append([90, -90, 30, -30])
     rectangles.append([100, 100, 140, 140])
     rectangles.append([-100, -100, -140, -140])
+
+    #pacman pellets/capsules/food
+    for index_x in range(5):
+        for index_y in range(5):
+            x_position = -120 + (60*index_x)
+            y_position = 120 - (60*index_y)
+            if (index_x == 0 and index_y == 0) or (index_x == 4 and index_y == 4):
+                new_pellet = [(x_position - 25), (y_position + 25), (x_position+25), (y_position-25)]
+            elif not ((index_x == 0 and index_y == 4) or (index_x ==2 and index_y == 2) or (index_x ==4 and index_y ==4) or (index_x == 1 and index_y == 1) or (index_x == 3 and index_y == 1) or (index_x == 1 and index_y == 3) or (index_x==3 and index_y==3)):
+                [(x_position - 10), (y_position +10), (x_position +10), (x_position+10)]
+
+
+
+
 
     for rect in rectangles:
         vWorld.add_obstacle(rect)
