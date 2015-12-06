@@ -502,14 +502,9 @@ def main(argv=None):
     rCanvas.after(200, gui.updateCanvas, drawQueue)
     g.m.mainloop()
 
-<<<<<<< HEAD
     # run_game_thread = threading.Thread(target=run_game)
     # run_game_thread.start()
-=======
-    game_thread = threading.Thread(target=run)
-    game_thread.start()
-    # run()    
->>>>>>> 9b052373a2251b3e7684a2fc560a57eae0ef4079
+
 
     for robot in joystick.gRobotList:
         robot.reset()
