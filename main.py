@@ -33,25 +33,24 @@ class VirtualWorldGui:
         self.button3 = tk.Button(m,text="Map")
         self.button3.pack(side='left')
         self.button3.bind('<Button-1>', self.drawMap)
-
-        self.button9 = tk.Button(m,text="Exit")
-        self.button9.pack(side='left')
-        self.button9.bind('<Button-1>', stopProg)
     
         self.button4 = tk.Button(m, text="AI Mode")
         self.button4.pack(side='left')
         self.button4.bind('<Button-1>', self.AI_mode)
         
-        
         self.button5 = tk.Button(m, text="Human Mode")
         self.button5.pack(side='left')
         self.button5.bind('<Button-1>', self.Human_mode)
+
+        self.button9 = tk.Button(m,text="Exit")
+        self.button9.pack(side='left')
+        self.button9.bind('<Button-1>', stopProg)
+
 
     def AI_mode(self, event=None):
         AI_thread = threading.Thread(target= AI_game)
         AI_thread.daemon = True
         AI_thread.start()
-    
     
     def Human_mode(self, event=None):
         Human_thread= threading.Thread(target=human_game)
@@ -102,6 +101,7 @@ class VirtualWorldGui:
         while (drawQueue.qsize() > 0):
             drawCommand = drawQueue.get()
             drawCommand()
+
 
 class Joystick:
     def __init__(self, comm, m, rCanvas):
@@ -393,23 +393,33 @@ class Joystick:
                 else:
                     self.vrobot.floor_r = False
             time.sleep(0.05)
-def human_game():
+
+
+def human_turn():
     print "w-for North \n s-for South \n a- for East \n d- for west"
     # wait for console input
     while True:
-        move =  str(sys.stdin.readline())
-        if move[0] == ['w', 'W']:
-            print "move north"
-        
-        elif move[0] in ["s", "S"]:
-            print "move south"
-        elif move[0] in ["a", "A"]:
+        move = str(sys.stdin.readline())[0].lower()
+
+        if move in ["w", "west]:
+            action = "West"
             print "move west"
-        elif move[0] in ["d", "D"]:
+            break
+        elif move in ["s", "south"]:
+            action = "South"
+            print "move south"
+            break
+        elif move in ["n", "north"]:
+            action = "North"
+            print "move north"
+            break
+        elif move in ["e", "east"]:
+            action = "East"
             print "move east"
+            break
         else:
-            print "done"
-            continue
+            print "Invalid move"
+    return action
 
 
 def stopProg(event=None):
@@ -548,15 +558,18 @@ def draw_virtual_world(virtual_world, joystick):
 
 # one run of this function corresponds to one 'turn' in the game
 # pacman and all ghosts move once, and game state is updated
-def nextTurn(gameState):
-    print "starting turn!"
+
+def nextTurn(gameState, gameMode):
     move_threads = []
 
     currentState = gameState
 
     for agentIndex in range(3):
-        legalActions = gameState.getLegalMoves(agentIndex)
-        action = legalActions[random.randrange(0, len(legalActions))] # choose action randomly
+        if gameMode = "Human" and agentIndex == 0:
+            action = human_turn()
+        else:
+            legalActions = gameState.getLegalMoves(agentIndex)
+            action = legalActions[random.randrange(0, len(legalActions))] # choose action randomly
 
         currentState = currentState.generateSuccessor(agentIndex, action)
 
@@ -621,8 +634,6 @@ def main(argv=None):
     canvas_height = 200 # original 380half height
     rCanvas = tk.Canvas(g.m, bg="white", width=canvas_width*2, height=canvas_height*2)
     joystick = Joystick(g.comm, g.m, rCanvas)
-
-
 
     # visual elements of the virtual robot
     poly_points = [0,0,0,0,0,0,0,0]
