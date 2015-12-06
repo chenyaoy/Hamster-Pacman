@@ -565,7 +565,7 @@ def nextTurn(gameState, gameMode):
     currentState = gameState
 
     for agentIndex in range(3):
-        if gameMode = "Human" and agentIndex == 0:
+        if gameMode == "Human" and agentIndex == 0:
             action = human_turn()
         else:
             legalActions = gameState.getLegalMoves(agentIndex)
@@ -583,7 +583,7 @@ def nextTurn(gameState, gameMode):
             move = launch_move_south
     
         # TODO - which robot do we move
-        moveThread = threading.Thread(target=move, args=(direction, None, agentIndex)) # the none is the event thing
+        moveThread = threading.Thread(target=move, args=(gameState.directions[agentIndex] , agentIndex)) # the none is the event thing
         moveThread.daemon = True
         moveThread.start()
 
@@ -596,7 +596,7 @@ def nextTurn(gameState, gameMode):
     return currentState
 
 # This is run on a separate thread from the main thread so that we can wait for moves to complete
-def run_game():
+def run_game(gameMode):
     time.sleep(1) # give time for robots to connect
     gameState = game.GameState()
     print "starting game!"
@@ -607,7 +607,7 @@ def run_game():
 
         # multithreading unnecessary for this part? it can be blocked since it's not main thread 
         # and doesn't need to do anything else
-        gameState = nextTurn(gameState)
+        gameState = nextTurn(gameState, gameMode)
 
     if gameState.isWin():
         print "Congratulations! You won!"
@@ -674,7 +674,7 @@ def main(argv=None):
     draw_world_thread.daemon = True
     draw_world_thread.start()
 
-    run_game_thread = threading.Thread(target=run_game)
+    run_game_thread = threading.Thread(target=run_game, args=("AI",))
     run_game_thread.start()
 
     gui = VirtualWorldGui(vWorld, g.m)
