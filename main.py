@@ -489,7 +489,6 @@ def turn(direction, robotIndex):
     ''' direction: -1 for left, 1 for right '''
     if g.comm.robotList:
         robot = g.comm.robotList[robotIndex]
-
         leftFloor = robot.get_floor(0)
         rightFloor = robot.get_floor(1)
 
