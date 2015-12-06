@@ -411,7 +411,7 @@ def nextTurn(gameState):
             move = launch_move_south
 
         # TODO - which robot do we move
-        moveThread = threading.Thread(target=move, args=(direction,))
+        moveThread = threading.Thread(target=move, args=(direction, None, agentIndex)) # the none is the event thing
         moveThread.daemon = True
         moveThread.start()
 
