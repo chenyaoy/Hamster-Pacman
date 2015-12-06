@@ -19,10 +19,6 @@ class Grid():
     def toString(self, grid):
         print "\n".join("\t".join(map(str,l)) for l in grid)
 
-    def getPosition(self, x, y):
-        x_position = -120 + (60*x)
-        y_position = 120 - (60*y)
-        return (x_position, y_position)
 
 class GameState():
     def __init__(self, prevState = None):
@@ -149,6 +145,18 @@ class GameState():
             state.pills.remove(position)
           # remove from virtual map
 
+    def get_all_coordinates(self):
+        coordinates = []
+        for agentIndex in range(3):
+            coordinates.append(get_coordinates(agentIndex))
+
+    def get_coordinates(self, agentIndex):
+        x = self.positions[agentIndex][0]
+        y = self.positions[agentIndex][1]
+        x_position = -120 + (60*x)
+        y_position = 120 - (60*y)
+        return (x_position, y_position)
+    
     def getPills(self):
         return self.pills
 
