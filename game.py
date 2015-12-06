@@ -19,6 +19,10 @@ class Grid():
     def toString(self, grid):
         print "\n".join("\t".join(map(str,l)) for l in grid)
 
+    def getPosition(self, x, y):
+        x_position = -120 + (60*x)
+        y_position = 120 - (60*y)
+        return (x_position, y_position)
 
 class GameState():
     def __init__(self, prevState = None):
@@ -124,7 +128,7 @@ class GameState():
 
         state.positions[agentIndex][0] += i
         state.positions[agentIndex][1] += j
-
+        
         if agentIndex == 0:
             consume(state.positions[agentIndex], state)
 

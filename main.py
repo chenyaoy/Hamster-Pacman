@@ -7,12 +7,10 @@ from tk_hamster_GUI import *
 import numpy as np
 import globalVars as g
 import graphics
-<<<<<<< HEAD
+
 import game, sys
-=======
-import game
 import random
->>>>>>> 9b052373a2251b3e7684a2fc560a57eae0ef4079
+
 
 UPDATE_INTERVAL = 30
 
@@ -501,7 +499,7 @@ def main(argv=None):
 
 
 
-    # visual elements of the virtual robot 
+    # visual elements of the virtual robot
     poly_points = [0,0,0,0,0,0,0,0]
     joystick.vrobot.poly_id = rCanvas.create_polygon(poly_points, fill='blue') #robot
     joystick.vrobot.prox_l_id = rCanvas.create_line(0,0,0,0, fill="red") #prox sensors
