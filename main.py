@@ -372,8 +372,9 @@ class Joystick:
             while not len(self.gRobotList) < 3:
                 print "waiting for robot to connect"
                 time.sleep(0.1)
+            print self.gRobotList
             for agentIndex in range(3):
-                update_virtual_robot(agentIndex)
+                self.update_virtual_robot(agentIndex)
 
     def update_virtual_robot(self, robotIndex):
         noise_prox = 25 # noisy level for proximity
@@ -634,8 +635,8 @@ def main(argv=None):
     #pacman pellets/capsules/food
     for index_x in range(5):
         for index_y in range(5):
-            x_position = -120 + (60*x)
-            y_position = 120 - (60*y)
+            x_position = -120 + (60*index_x)
+            y_position = 120 - (60*index_y)
             if (index_x == 0 and index_y == 0) or (index_x == 4 and index_y == 4):
                 new_pellet = [(x_position - 25), (y_position + 25), (x_position+25), (y_position-25)]
             elif not ((index_x == 0 and index_y == 4) or (index_x ==2 and index_y == 2) or (index_x ==4 and index_y ==4) or (index_x == 1 and index_y == 1) or (index_x == 3 and index_y == 1) or (index_x == 1 and index_y == 3) or (index_x==3 and index_y==3)):
