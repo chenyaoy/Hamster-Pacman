@@ -628,8 +628,11 @@ def main(argv=None):
             x_position = -120 + (60*x)
             y_position = 120 - (60*y)
             if (index_x == 0 and index_y == 0) or (index_x == 4 and index_y == 4):
-                [(x_position - 25), (y_position + 25), (x_position+25), (y_position-25)]
-            elif not (index_x == 0)
+                new_pellet = [(x_position - 25), (y_position + 25), (x_position+25), (y_position-25)]
+            elif not ((index_x == 0 and index_y == 4) or (index_x ==2 and index_y == 2) or (index_x ==4 and index_y ==4) or (index_x == 1 and index_y == 1) or (index_x == 3 and index_y == 1) or (index_x == 1 and index_y == 3) or (index_x==3 and index_y==3)):
+                [(x_position - 10), (y_position +10), (x_position +10), (x_position+10)]
+
+
 
 
 
