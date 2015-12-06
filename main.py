@@ -402,19 +402,19 @@ def human_turn():
         move = str(sys.stdin.readline())[0].lower()
 
         if move in ["w", "west"]:
-            action = "West"
+            action = "WEST"
             print "move west"
             break
         elif move in ["s", "south"]:
-            action = "South"
+            action = "SOUTH"
             print "move south"
             break
         elif move in ["n", "north"]:
-            action = "North"
+            action = "NORTH"
             print "move north"
             break
         elif move in ["e", "east"]:
-            action = "East"
+            action = "EAST"
             print "move east"
             break
         else:
@@ -430,25 +430,119 @@ def stopProg(event=None):
 
 # NON JOYSTICK ONES
 
-def launch_move_north(self, event=None, robotIndex=0):
-    turn_right_thread = threading.Thread(target=self.move_north, args=(lastMoveDirection, robotIndex))
+def launch_move_north(direction, robotIndex=0):
+    turn_right_thread = threading.Thread(target=move_north, args=(direction, robotIndex))
     turn_right_thread.daemon = True
     turn_right_thread.start()
 
-def launch_move_south(self, event=None, robotIndex=0):
-    turn_right_thread = threading.Thread(target=self.move_south, args=(lastMoveDirection, robotIndex))
+def launch_move_south(direction, robotIndex=0):
+    turn_right_thread = threading.Thread(target=move_south, args=(direction, robotIndex))
     turn_right_thread.daemon = True
     turn_right_thread.start()
 
-def launch_move_east(self, event=None, robotIndex=0):
-    turn_right_thread = threading.Thread(target=self.move_east, args=(lastMoveDirection, robotIndex))
+def launch_move_east(direction, robotIndex=0):
+    turn_right_thread = threading.Thread(target=move_east, args=(direction, robotIndex))
     turn_right_thread.daemon = True
     turn_right_thread.start()
 
-def launch_move_west(self, event=None, robotIndex=0):
-    turn_right_thread = threading.Thread(target=self.move_west, args=(lastMoveDirection, robotIndex))
+def launch_move_west(direction, robotIndex=0):
+    turn_right_thread = threading.Thread(target=move_west, args=(direction, robotIndex))
     turn_right_thread.daemon = True
     turn_right_thread.start()
+
+def move_north(direction, robotIndex):
+    if gRobotList:   
+        robot = gRobotList[robotIndex]
+
+        if direction == "NORTH":
+            move_forward(robotIndex)
+
+        elif direction == "EAST":
+            turn(-1, robotIndex)
+            move_forward(robotIndex)
+
+        elif direction == "WEST":
+            turn(1, robotIndex)
+            move_forward(robotIndex)
+
+        elif direction == "SOUTH":
+            turn(1, robotIndex)
+            turn(1, robotIndex)
+            move_forward(robotIndex)
+            # self.move_backward()
+
+        global lastMoveDirection
+        lastMoveDirection = "NORTH"
+
+
+def move_south(direction, robotIndex):
+    if gRobotList: 
+        robot = gRobotList[robotIndex]
+        if direction == "NORTH":
+            turn(1, robotIndex)
+            turn(1, robotIndex)
+            move_forward(robotIndex)
+            # move_backward()
+
+        elif direction == "EAST":
+            turn(1, robotIndex)
+            move_forward(robotIndex)
+
+        elif direction == "WEST":
+            turn(-1, robotIndex)
+            move_forward(robotIndex)
+
+        elif direction == "SOUTH":
+            move_forward(robotIndex)
+
+        global lastMoveDirection
+        lastMoveDirection = "SOUTH"
+
+def move_east(direction, robotIndex):
+    if gRobotList: 
+        robot = gRobotList[robotIndex]
+        if direction == "NORTH":
+            turn(1, robotIndex)
+            move_forward(robotIndex)
+
+        elif direction == "EAST":
+            move_forward(robotIndex)
+
+        elif direction == "WEST":
+            turn(1, robotIndex)
+            turn(1, robotIndex)
+            move_forward(robotIndex)
+            # move_backward()
+
+        elif direction == "SOUTH":
+            turn(-1, robotIndex)
+            move_forward(robotIndex)
+
+        global lastMoveDirection
+        lastMoveDirection = "EAST"
+
+def move_west(direction, robotIndex):
+    if gRobotList: 
+        robot = gRobotList[robotIndex]
+        if direction == "NORTH":
+            turn(-1, robotIndex)
+            move_forward(robotIndex)
+
+        elif direction == "EAST":
+            turn(1, robotIndex)
+            turn(1, robotIndex)
+            move_forward(robotIndex)
+            # move_backward()
+
+        elif direction == "WEST":
+            move_forward(robotIndex)
+
+        elif direction == "SOUTH":
+            turn(1, robotIndex)
+            move_forward(robotIndex)
+
+        global lastMoveDirection
+        lastMoveDirection = "WEST"
 
 
 def draw_virtual_world(virtual_world, joystick):
@@ -464,6 +558,7 @@ def draw_virtual_world(virtual_world, joystick):
 
 # one run of this function corresponds to one 'turn' in the game
 # pacman and all ghosts move once, and game state is updated
+
 def nextTurn(gameState, gameMode):
     move_threads = []
 
@@ -478,13 +573,13 @@ def nextTurn(gameState, gameMode):
 
         currentState = currentState.generateSuccessor(agentIndex, action)
 
-        if action == "North":
+        if action == "NORTH":
             move = launch_move_north
-        elif action == "East":
+        elif action == "EAST":
             move = launch_move_east
-        elif action == "West":
+        elif action == "WEST":
             move = launch_move_west
-        elif action == "South":
+        elif action == "SOUTH":
             move = launch_move_south
     
         # TODO - which robot do we move
@@ -502,8 +597,10 @@ def nextTurn(gameState, gameMode):
 
 # This is run on a separate thread from the main thread so that we can wait for moves to complete
 def run_game():
+    time.sleep(1) # give time for robots to connect
     gameState = game.GameState()
-    while not (game.isWin() or game.isLose()):
+    print "starting game!"
+    while not (gameState.isWin() or gameState.isLose()):
         # turnThread = threading.Thread(target=nextTurn, args=(gameState,))
         # turnThread.daemon = True
         # turnThread.start()
@@ -512,12 +609,12 @@ def run_game():
         # and doesn't need to do anything else
         gameState = nextTurn(gameState)
 
-    if game.isWin():
+    if gameState.isWin():
         print "Congratulations! You won!"
     else:
         print "Sorry, you lost..."
 
-    print "Score: ", game.score
+    print "Score: ", gameState.score
 
     # return game.score
 
@@ -575,6 +672,9 @@ def main(argv=None):
     draw_world_thread.daemon = True
     draw_world_thread.start()
 
+    run_game_thread = threading.Thread(target=run_game)
+    run_game_thread.start()
+
     gui = VirtualWorldGui(vWorld, g.m)
 
     gui.drawGrid()
@@ -582,10 +682,6 @@ def main(argv=None):
 
     rCanvas.after(200, gui.updateCanvas, drawQueue)
     g.m.mainloop()
-
-    # run_game_thread = threading.Thread(target=run_game)
-    # run_game_thread.start()
-
 
     for robot in joystick.gRobotList:
         robot.reset()
