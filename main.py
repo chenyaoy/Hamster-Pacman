@@ -6,16 +6,13 @@ import math
 import threading
 from tk_hamster_GUI import *
 import numpy as np
-
 import game
 import random
-
 
 UPDATE_INTERVAL = 30
 gMaxRobotNum = 3 # max number of robots to control
 gQuit = False
 m = None
-
 
 class VirtualWorldGui:
     def __init__(self, vWorld, m):
