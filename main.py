@@ -612,14 +612,16 @@ def main(argv=None):
     rectangles.append([90, -90, 30, -30])
     rectangles.append([100, 100, 140, 140])
     rectangles.append([-100, -100, -140, -140])
-    
+
     #pacman pellets/capsules/food
     for index_x in range(5):
         for index_y in range(5):
-            if index_x == 0 and index_y 
             x_position = -120 + (60*x)
             y_position = 120 - (60*y)
-            [(x_position - 25), (y_position + 25), (x_position+25), ]
+            if (index_x == 0 and index_y == 0) or (index_x == 4 and index_y == 4):
+                [(x_position - 25), (y_position + 25), (x_position+25), (y_position-25)]
+            elif not (index_x == 0)
+
 
 
     for rect in rectangles:
