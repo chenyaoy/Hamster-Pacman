@@ -139,7 +139,7 @@ class Joystick:
         rCanvas.bind_all('<w>', self.launch_move_forward)
         # rCanvas.bind_all('<s>', self.move_down)
         # rCanvas.bind_all('<a>', self.move_left)
-        rCanvas.bind_all('<d>', self.launch_turn)
+        #rCanvas.bind_all('<d>', self.launch_turn)
         rCanvas.bind_all('<x>', self.stop_move)  
         rCanvas.pack()
 
@@ -461,7 +461,10 @@ def main(argv=None):
     rectangles.append([90, 90, 30, 30])
     rectangles.append([-90, -90, -30, -30])
     rectangles.append([90, -90, 30, -30])
+    rectangles.append([100, 100, 140, 140])
+    rectangles.append([-100, -100, -140, -140])
     
+
     for rect in rectangles:
         vWorld.add_obstacle(rect)
 
