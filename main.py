@@ -7,7 +7,7 @@ from tk_hamster_GUI import *
 import numpy as np
 import globalVars as g
 import graphics
-import game
+import game, sys
 
 UPDATE_INTERVAL = 30
 
@@ -390,14 +390,22 @@ class Joystick:
                     self.vrobot.floor_r = False
             time.sleep(0.05)
 def human_game():
-    print "made it to human game"
+    print "w-for North \n s-for South \n a- for East \n d- for west"
     # wait for console input
-    move = input("Input direction: ")
-    if move == "w":
-        print
-    elif move == "s":
-    elif move == "a":
-    elif move == "d":
+    while True:
+        move =  str(sys.stdin.readline())
+        if move[0] == ['w', 'W']:
+            print "move north"
+        
+        elif move[0] in ["s", "S"]:
+            print "move south"
+        elif move[0] in ["a", "A"]:
+            print "move west"
+        elif move[0] in ["d", "D"]:
+            print "move east"
+        else:
+            print "done"
+            continue
 
 def nextGameTurn():
     # for each agent
