@@ -821,8 +821,9 @@ def main(argv=None):
 
     ''' objects in the world '''
     rectangles = []
-
-    # pacman map
+    pellets = []
+    
+    # pacman map/walls
     rectangles.append([-150, -150, 150, 150]) #overall square
     rectangles.append([-90, 90, -30, 30])
     rectangles.append([90, 90, 30, 30])
@@ -831,6 +832,13 @@ def main(argv=None):
     rectangles.append([100, 100, 140, 140])
     rectangles.append([-100, -100, -140, -140])
     
+    #pacman pellets/capsules/food
+    for index_x in range(5):
+        for index_y in range(5):
+            if index_x == 0 and index_y 
+            x_position = -120 + (60*x)
+            y_position = 120 - (60*y)
+            [(x_position - 25), (y_position + 25), (x_position+25), ]
 
     for rect in rectangles:
         vWorld.add_obstacle(rect)
