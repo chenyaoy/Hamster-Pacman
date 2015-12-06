@@ -80,13 +80,13 @@ class GameState():
                                 continue
 
                 if i == -1 and j == 0:
-                    legalMoves.append("West")
+                    legalMoves.append("WEST")
                 if i == 1 and j == 0:
-                    legalMoves.append("East")
+                    legalMoves.append("EAST")
                 if i == 0 and j == -1:
-                    legalMoves.append("South")
+                    legalMoves.append("SOUTH")
                 if i == 0 and j == 1:
-                    legalMoves.append("North")
+                    legalMoves.append("NORTHs")
         return legalMoves
 
     def generateSuccessor(self, agentIndex, action):
@@ -113,16 +113,16 @@ class GameState():
         return state
 
     def applyAction(self, agentIndex, state, action):
-        if action == "North":
+        if action == "NORTH":
             i = 0
             j = 1
-        elif action == "East":
+        elif action == "EAST":
             i = 1
             j = 0
-        elif action == "West":
+        elif action == "WEST":
             i = -1
             j = 0
-        elif action == "South":
+        elif action == "SOUTH":
             i = 0
             j = -1
 
@@ -131,6 +131,8 @@ class GameState():
 
         oldx, oldy = state.positions[agentIndex]
         state.positions[agentIndex] = (oldx + i, oldy + j)
+
+        state.directions[agentIndex] = action
         
         if agentIndex == 0:
             self.consume(state.positions[agentIndex], state)
