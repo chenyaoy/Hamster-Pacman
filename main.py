@@ -396,7 +396,7 @@ class Joystick:
 
 
 def human_turn():
-    print "w-for North \n s-for South \n a- for East \n d- for west"
+    print "n-for North \n s-for South \n e- for East \n w- for west"
     # wait for console input
     while True:
         move = str(sys.stdin.readline())[0].lower()
@@ -664,11 +664,16 @@ def nextTurn(gameState, gameMode):
 
     currentState = gameState
 
-    for agentIndex in range(3):
+    def move(currentState, agentIndex):
+        legalActions = gameState.getLegalMoves(agentIndex)
         if gameMode == "Human" and agentIndex == 0:
-            action = human_turn()
+            while True:
+                action = human_turn()
+                if action in legalActions:
+                    break
+                else:
+                    print "Action is not legal."
         else:
-            legalActions = gameState.getLegalMoves(agentIndex)
             action = legalActions[random.randrange(0, len(legalActions))] # choose action randomly
 
         currentState = currentState.generateSuccessor(agentIndex, action)
@@ -689,6 +694,14 @@ def nextTurn(gameState, gameMode):
 
         move_threads.append(moveThread)
 
+        return currentState
+
+    if currentState.boostTimer > 0: # pacman gets to move twice
+        move(currentState, 0)
+        
+
+    for agentIndex in range(3):
+        currentState = move(currentState, agentIndex)
         if currentState.isWin() or currentState.isLose():
             break
 
@@ -696,11 +709,12 @@ def nextTurn(gameState, gameMode):
     for thread in move_threads:
         thread.join()
 
+    if currentState.boostTimer > 0:
+        currentState.boostTimer -= 1
     return currentState
 
 # This is run on a separate thread from the main thread so that we can wait for moves to complete
 def run_game(gameMode):
-
     while len(joystick.gRobotList) < 3:
         print "not enough robots"
         time.sleep(1)
@@ -709,6 +723,8 @@ def run_game(gameMode):
 
     gameState = game.GameState()
     print "starting game!"
+    print "Win?", gameState.isWin()
+    print "Lose?", gameState.isLose()
     while not (gameState.isWin() or gameState.isLose()):
         # turnThread = threading.Thread(target=nextTurn, args=(gameState,))
         # turnThread.daemon = True
@@ -720,11 +736,11 @@ def run_game(gameMode):
 
     if gameState.isWin():
         print "Congratulations! You won!"
-    else:
+    elif gameState.isLose():
         print "Sorry, you lost..."
 
     print "Score: ", gameState.score
-
+    stopProg()
     # return game.score
 
 def main(argv=None):
@@ -786,7 +802,7 @@ def main(argv=None):
     draw_world_thread.daemon = True
     draw_world_thread.start()
 
-    run_game_thread = threading.Thread(target=run_game, args=("AI",))
+    run_game_thread = threading.Thread(target=run_game, args=("Human",))
     run_game_thread.start()
 
     gui = VirtualWorldGui(vWorld, g.m)
@@ -796,8 +812,6 @@ def main(argv=None):
 
     rCanvas.after(200, gui.updateCanvas, drawQueue)
     g.m.mainloop()
-
-    
 
 
     for robot in joystick.gRobotList:
