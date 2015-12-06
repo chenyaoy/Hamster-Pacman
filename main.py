@@ -410,13 +410,6 @@ def human_game():
             print "done"
             continue
 
-def nextGameTurn():
-    # for each agent
-    # get legal moves
-    # decide on move and launch thread to make the move
-    # join threads
-    pass    
-
 
 def stopProg(event=None):
     g.m.quit()
@@ -435,14 +428,18 @@ def draw_virtual_world(virtual_world, joystick):
             virtual_world.draw_floor("right")
         time.sleep(0.1)
 
+# one run of this function corresponds to one 'turn' in the game
+# pacman and all ghosts move once, and game state is updated
 def nextTurn(gameState):
     move_threads = []
+
+    currentState = gameState
 
     for agentIndex in range(3):
         legalActions = gameState.getLegalMoves(agentIndex)
         action = legalActions[random.randrange(0, len(legalActions))] # choose action randomly
 
-        successor = gameState.generateSuccessor(agentIndex, action)
+        currentState = currentState.generateSuccessor(agentIndex, action)
 
         if action == "North":
             move = launch_move_north
@@ -453,23 +450,30 @@ def nextTurn(gameState):
         elif action == "South":
             move = launch_move_south
 
-
+        # TODO - which robot do we move
         moveThread = threading.Thread(target=move, args=(direction,))
         moveThread.daemon = True
         moveThread.start()
 
         move_threads.append(moveThread)
 
+    # wait for all three movements to be over
     for thread in move_threads:
         thread.join()
 
+    return currentState
 
+# This is run on a separate thread from the main thread so that we can wait for moves to complete
 def run_game():
     gameState = game.GameState()
     while not (game.isWin() or game.isLose()):
-        turnThread = threading.Thread(target=nextTurn, args=(gameState))
-        turnThread.daemon = True
-        turnThread.start()
+        # turnThread = threading.Thread(target=nextTurn, args=(gameState,))
+        # turnThread.daemon = True
+        # turnThread.start()
+
+        # multithreading unnecessary for this part? it can be blocked since it's not main thread 
+        # and doesn't need to do anything else
+        gameState = nextTurn(gameState)
 
     if game.isWin():
         print "Congratulations! You won!"
@@ -480,7 +484,7 @@ def run_game():
 
     # return game.score
 
-def main(argv=None): 
+def main(argv=None):
     global sleepTime
     sleepTime = 0.01
     g.comm.start()
@@ -546,9 +550,9 @@ def main(argv=None):
     rCanvas.after(200, gui.updateCanvas, drawQueue)
     g.m.mainloop()
 
-    game_thread = threading.Thread(target=run)
-    game_thread.start()
-    # run()    
+    # run_game_thread = threading.Thread(target=run_game)
+    # run_game_thread.start()
+
 
     for robot in joystick.gRobotList:
         robot.reset()
