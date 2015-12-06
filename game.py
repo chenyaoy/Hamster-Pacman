@@ -26,6 +26,8 @@ class GameState():
         self.win = False
         self.scoreChange = 0
 
+        self.TIME_PENALTY = 1
+
         self.wallLocations = [(1, 1), (1, 3), (3, 1), (3, 3)]
         self.walls = Grid(5, 5, False)
         for wall in self.wallLocations:
@@ -37,11 +39,13 @@ class GameState():
             self.score = prevState.score
             self.numFood = prevState.numFood
             self.positions = prevState.positions
+            self.directions = prevState.directions
         else: # beginning game state
             self.score = 0
             self.numFood = 16
             self.pills = [(0, 4), (4, 0)]
             self.positions = [(2, 2), (0, 0), (4, 4)]
+            self.directions = ["NORTH", "NORTH", "NORTH"]
 
             self.food = Grid(5, 5, True)
             # Locations where pacman, ghosts, and speed boosts start so there is no food there
@@ -54,10 +58,10 @@ class GameState():
                 self.food[wall[0]][wall[1]] = False
                     
 
-    def getLegalMoves(agentIndex):
+    def getLegalMoves(self, agentIndex):
         if self.isWin() or self.isLose(): return []
 
-        currentPos = self.positions[agent]
+        currentPos = self.positions[agentIndex]
         legalMoves = []
         for i in range(-1, 2):
             for j in range(-1, 2):
@@ -85,7 +89,7 @@ class GameState():
                     legalMoves.append("North")
         return legalMoves
 
-    def generateSuccessor(agentIndex, action):
+    def generateSuccessor(self, agentIndex, action):
         # Check that successors exist
         if self.isWin() or self.isLose(): raise Exception('Can\'t generate a successor of a terminal state.')
     
@@ -101,14 +105,14 @@ class GameState():
 
         # Time passes
         if agentIndex == 0:
-            state.scoreChange += -TIME_PENALTY # Penalty for waiting around
+            state.scoreChange += -self.TIME_PENALTY # Penalty for waiting around
 
         # Book keeping
         # state.agentMoved = agentIndex
         state.score += state.scoreChange
         return state
 
-    def applyAction(agentIndex, state, action):
+    def applyAction(self, agentIndex, state, action):
         if action == "North":
             i = 0
             j = 1
@@ -122,13 +126,16 @@ class GameState():
             i = 0
             j = -1
 
-        state.positions[agentIndex][0] += i
-        state.positions[agentIndex][1] += j
+        # state.positions[agentIndex][0] += i
+        # state.positions[agentIndex][1] += j
+
+        oldx, oldy = state.positions[agentIndex]
+        state.positions[agentIndex] = (oldx + i, oldy + j)
         
         if agentIndex == 0:
-            consume(state.positions[agentIndex], state)
+            self.consume(state.positions[agentIndex], state)
 
-    def consume( position, state ):
+    def consume(self, position, state ):
         x, y = position
         # Eat food
         if state.food[x][y]:
