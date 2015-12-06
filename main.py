@@ -96,9 +96,10 @@ class Joystick:
         rCanvas.bind_all('<x>', self.stop_move)  
         rCanvas.pack()
 
-    def move_forward(self):
+    def move_forward(self, robotIndex):
         if self.gRobotList:
-            robot = self.gRobotList[0]
+            # robot = self.gRobotList[0]
+            robot = self.gRobotList[robotIndex]
             self.vrobot.sl = 15
             self.vrobot.sr = 15   
 
@@ -138,10 +139,10 @@ class Joystick:
             self.vrobot.t = time.time()
     
 
-    def turn(self, direction):
+    def turn(self, direction, robotIndex):
         ''' direction: -1 for left, 1 for right '''
         if self.gRobotList:
-            robot = self.gRobotList[0]
+            robot = self.gRobotList[robotIndex]
 
             leftFloor = robot.get_floor(0)
             rightFloor = robot.get_floor(1)
@@ -205,116 +206,116 @@ class Joystick:
             robot.set_wheel(1,self.vrobot.sr)
             self.vrobot.t = time.time()  
 
-    def launch_move_north(self, event=None):
-        turn_right_thread = threading.Thread(target=self.move_north, args=(lastMoveDirection,))
+    def launch_move_north(self, event=None, robotIndex=0):
+        turn_right_thread = threading.Thread(target=self.move_north, args=(lastMoveDirection, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
-    def launch_move_south(self, event=None):
-        turn_right_thread = threading.Thread(target=self.move_south, args=(lastMoveDirection,))
+    def launch_move_south(self, event=None, robotIndex=0):
+        turn_right_thread = threading.Thread(target=self.move_south, args=(lastMoveDirection, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
-    def launch_move_east(self, event=None):
-        turn_right_thread = threading.Thread(target=self.move_east, args=(lastMoveDirection,))
+    def launch_move_east(self, event=None, robotIndex=0):
+        turn_right_thread = threading.Thread(target=self.move_east, args=(lastMoveDirection, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
-    def launch_move_west(self, event=None):
-        turn_right_thread = threading.Thread(target=self.move_west, args=(lastMoveDirection,))
+    def launch_move_west(self, event=None, robotIndex=0):
+        turn_right_thread = threading.Thread(target=self.move_west, args=(lastMoveDirection, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
-    def move_north(self, direction):
+    def move_north(self, direction, robotIndex):
         if self.gRobotList:   
-            robot = self.gRobotList[0]
+            robot = self.gRobotList[robotIndex]
 
             if direction == "NORTH":
-                self.move_forward()
+                self.move_forward(robotIndex)
 
             elif direction == "EAST":
-                self.turn(-1)
-                self.move_forward()
+                self.turn(-1, robotIndex)
+                self.move_forward(robotIndex)
 
             elif direction == "WEST":
-                self.turn(1)
-                self.move_forward()
+                self.turn(1, robotIndex)
+                self.move_forward(robotIndex)
 
             elif direction == "SOUTH":
-                self.turn(1)
-                self.turn(1)
-                self.move_forward()
+                self.turn(1, robotIndex)
+                self.turn(1, robotIndex)
+                self.move_forward(robotIndex)
                 # self.move_backward()
 
             global lastMoveDirection
             lastMoveDirection = "NORTH"
 
 
-    def move_south(self, direction):
+    def move_south(self, direction, robotIndex):
         if self.gRobotList: 
-            robot = self.gRobotList[0]
+            robot = self.gRobotList[robotIndex]
             if direction == "NORTH":
-                self.turn(1)
-                self.turn(1)
-                self.move_forward()
+                self.turn(1, robotIndex)
+                self.turn(1, robotIndex)
+                self.move_forward(robotIndex)
                 # self.move_backward()
 
             elif direction == "EAST":
-                self.turn(1)
-                self.move_forward()
+                self.turn(1, robotIndex)
+                self.move_forward(robotIndex)
 
             elif direction == "WEST":
-                self.turn(-1)
-                self.move_forward()
+                self.turn(-1, robotIndex)
+                self.move_forward(robotIndex)
 
             elif direction == "SOUTH":
-                self.move_forward()
+                self.move_forward(robotIndex)
 
             global lastMoveDirection
             lastMoveDirection = "SOUTH"
 
-    def move_east(self, direction):
+    def move_east(self, direction, robotIndex):
         if self.gRobotList: 
-            robot = self.gRobotList[0]
+            robot = self.gRobotList[robotIndex]
             if direction == "NORTH":
-                self.turn(1)
-                self.move_forward()
+                self.turn(1, robotIndex)
+                self.move_forward(robotIndex)
 
             elif direction == "EAST":
-                self.move_forward()
+                self.move_forward(robotIndex)
 
             elif direction == "WEST":
-                self.turn(1)
-                self.turn(1)
-                self.move_forward()
+                self.turn(1, robotIndex)
+                self.turn(1, robotIndex)
+                self.move_forward(robotIndex)
                 # self.move_backward()
 
             elif direction == "SOUTH":
-                self.turn(-1)
-                self.move_forward()
+                self.turn(-1, robotIndex)
+                self.move_forward(robotIndex)
 
             global lastMoveDirection
             lastMoveDirection = "EAST"
 
-    def move_west(self, direction):
+    def move_west(self, direction, robotIndex):
         if self.gRobotList: 
-            robot = self.gRobotList[0]
+            robot = self.gRobotList[robotIndex]
             if direction == "NORTH":
-                self.turn(-1)
-                self.move_forward()
+                self.turn(-1, robotIndex)
+                self.move_forward(robotIndex)
 
             elif direction == "EAST":
-                self.turn(1)
-                self.turn(1)
-                self.move_forward()
+                self.turn(1, robotIndex)
+                self.turn(1, robotIndex)
+                self.move_forward(robotIndex)
                 # self.move_backward()
 
             elif direction == "WEST":
-                self.move_forward()
+                self.move_forward(robotIndex)
 
             elif direction == "SOUTH":
-                self.turn(1)
-                self.move_forward()
+                self.turn(1, robotIndex)
+                self.move_forward(robotIndex)
 
             global lastMoveDirection
             lastMoveDirection = "WEST"
