@@ -63,7 +63,8 @@ class VirtualWorldGui:
         navigation_thread.start()
 
     def resetvRobot(self, event=None):
-        self.vworld.vrobot.reset_robot()
+        for agentIndex in range(3):
+            self.vworld.vrobot.reset_robots(agentIndex)
 
     def drawMap(self, event=None):
         self.vworld.draw_map()
@@ -108,8 +109,11 @@ class Joystick:
         self.gMaxRobotNum = 1
         self.gRobotList = comm.robotList
         self.m = m
-        self.vrobot = virtual_robot()
-        self.vrobot.t = time.time()
+        self.vrobots = []
+        for agentIndex in range(3):
+            self.vrobots.append(virtual_robot(agentIndex))
+            self.vrobots[agentIndex].t = time.time()
+        
 
 
         rCanvas.bind_all('<w>', self.launch_move_north)
@@ -124,11 +128,13 @@ class Joystick:
         if self.gRobotList:
             # robot = self.gRobotList[0]
             robot = self.gRobotList[robotIndex]
-            self.vrobot.sl = 15
-            self.vrobot.sr = 15   
+            vrobot = self.vrobots[robotIndex]
+            vrobot.sl = 15
+            vrobot.sr = 15
 
-            robot.set_wheel(0,self.vrobot.sl)
-            robot.set_wheel(1,self.vrobot.sr)
+
+            robot.set_wheel(0, self.vrobot.sl)
+            robot.set_wheel(1, self.vrobot.sr)
             time.sleep(0.5)
 
             print "initial move forward"
@@ -137,16 +143,17 @@ class Joystick:
             rightFloor = robot.get_floor(1)
 
             while not (leftFloor < 40 and rightFloor < 40):
-                print "while loop: floorleft %d floorright %d" % (leftFloor, rightFloor)
+
+                # print "while loop: floorleft %d floorright %d" % (leftFloor, rightFloor)
                 if rightFloor < 40: # right floor sensor sees black, robot turns right
-                    self.vrobot.sl = 15
-                    self.vrobot.sr = -15  
+                    vrobot.sl = 15
+                    vrobot.sr = -15
                 elif leftFloor < 40: # left floor sensor sees black, robot turns left
-                    self.vrobot.sl = -15
-                    self.vrobot.sr = 15   
+                    vrobot.sl = -15
+                    vrobot.sr = 15
                 else:
-                    self.vrobot.sl = 15
-                    self.vrobot.sr = 15   
+                    vrobot.sl = 15
+                    vrobot.sr = 15
                 robot.set_wheel(0, self.vrobot.sl)
                 robot.set_wheel(1, self.vrobot.sr)
 
@@ -155,34 +162,34 @@ class Joystick:
                 leftFloor = robot.get_floor(0)
                 rightFloor = robot.get_floor(1)
 
-            self.vrobot.sl = 0
-            self.vrobot.sr = 0
+            vrobot.sl = 0
+            vrobot.sr = 0
             robot.set_wheel(0, 0)
             robot.set_wheel(1, 0)
 
-            self.vrobot.t = time.time()
+            vrobot.t = time.time()
     
 
     def turn(self, direction, robotIndex):
         ''' direction: -1 for left, 1 for right '''
         if self.gRobotList:
             robot = self.gRobotList[robotIndex]
-
+            vrobot = self.vrobots[robotIndex]
             leftFloor = robot.get_floor(0)
             rightFloor = robot.get_floor(1)
 
             # move forward until both white
             while not (leftFloor > 40 and rightFloor > 40):
-                self.vrobot.sl = 15
-                self.vrobot.sr = 15
+                vrobot.sl = 15
+                vrobot.sr = 15
                 robot.set_wheel(0, self.vrobot.sl)
                 robot.set_wheel(1, self.vrobot.sr)
                 leftFloor = robot.get_floor(0)
                 rightFloor = robot.get_floor(1)
                 time.sleep(0.01)
 
-            self.vrobot.sl = 0
-            self.vrobot.sr = 0
+            vrobot.sl = 0
+            vrobot.sr = 0
             robot.set_wheel(0, 0)
             robot.set_wheel(1, 0)
 
@@ -198,21 +205,21 @@ class Joystick:
             while True:
                 if floor < 40:
                     seenBlack = True
-                    self.vrobot.sl = 15 * direction
-                    self.vrobot.sr = -15 * direction
+                    vrobot.sl = 15 * direction
+                    vrobot.sr = -15 * direction
                     robot.set_wheel(0, self.vrobot.sl)
                     robot.set_wheel(1, self.vrobot.sr)
                 elif floor > 40 and seenBlack:
                     # stop
                     time.sleep(0.2) # move a bit extra
-                    self.vrobot.sl = 0
-                    self.vrobot.sr = 0
+                    vrobot.sl = 0
+                    vrobot.sr = 0
                     robot.set_wheel(0, 0)
                     robot.set_wheel(1, 0)
                     break
                 else:
-                    self.vrobot.sl = 15 * direction
-                    self.vrobot.sr = -15 * direction
+                    vrobot.sl = 15 * direction
+                    vrobot.sr = -15 * direction
                     robot.set_wheel(0, self.vrobot.sl)
                     robot.set_wheel(1, self.vrobot.sr)
 
@@ -224,6 +231,7 @@ class Joystick:
     def stop_move(self, event=None):
         if self.gRobotList: 
             robot = self.gRobotList[0]
+            
             self.vrobot.sl = 0
             self.vrobot.sr = 0
             robot.set_wheel(0,self.vrobot.sl)
@@ -231,29 +239,36 @@ class Joystick:
             self.vrobot.t = time.time()  
 
     def launch_move_north(self, event=None, direction="NORTH", robotIndex=0):
+        print "launching move north"
         turn_right_thread = threading.Thread(target=self.move_north, args=(direction, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_south(self, event=None, direction="NORTH", robotIndex=0):
+        print "launching move south"
         turn_right_thread = threading.Thread(target=self.move_south, args=(direction, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_east(self, event=None, direction="NORTH", robotIndex=0):
+        print "launching move east"
         turn_right_thread = threading.Thread(target=self.move_east, args=(direction, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_west(self, event=None, direction="NORTH", robotIndex=0):
+        print "launching move west"
         turn_right_thread = threading.Thread(target=self.move_west, args=(direction, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def move_north(self, direction, robotIndex):
         if self.gRobotList:   
+            print "moving north:" 
+            print "direction: ", direction
+            print "robot index:", robotIndex
             robot = self.gRobotList[robotIndex]
-
+            vrobot = self.vrobots[robotIndex]
             if direction == "NORTH":
                 self.move_forward(robotIndex)
 
@@ -277,7 +292,9 @@ class Joystick:
 
     def move_south(self, direction, robotIndex):
         if self.gRobotList: 
+            print "moving south"
             robot = self.gRobotList[robotIndex]
+            vrobot = self.vrobots[robotIndex]
             if direction == "NORTH":
                 self.turn(1, robotIndex)
                 self.turn(1, robotIndex)
@@ -300,7 +317,9 @@ class Joystick:
 
     def move_east(self, direction, robotIndex):
         if self.gRobotList: 
+            print "moving east"
             robot = self.gRobotList[robotIndex]
+            vrobot = self.vrobots[robotIndex]
             if direction == "NORTH":
                 self.turn(1, robotIndex)
                 self.move_forward(robotIndex)
@@ -323,7 +342,9 @@ class Joystick:
 
     def move_west(self, direction, robotIndex):
         if self.gRobotList: 
+            print "moving west"
             robot = self.gRobotList[robotIndex]
+            vrobot = self.vrobots[robotIndex]
             if direction == "NORTH":
                 self.turn(-1, robotIndex)
                 self.move_forward(robotIndex)
@@ -345,54 +366,57 @@ class Joystick:
             lastMoveDirection = "WEST"
 
 
-    def update_virtual_robot(self):
+    def update_all_virtual_robots(self):
+        while not g.gQuit:
+            while not len(self.gRobotList) < 3:
+                print "waiting for robot to connect"
+                time.sleep(0.1)
+            for agentIndex in range(3):
+                update_virtual_robot(agentIndex)
+
+    def update_virtual_robot(self, robotIndex):
         noise_prox = 25 # noisy level for proximity
         noise_floor = 20 # floor ambient color - if floor is darker, set higher noise
         p_factor = 1.4 # proximity conversion - assuming linear
         d_factor = 1.1 # travel distance conversion
-        a_factor = 17 # rotation conversion, assuming linear 
+        a_factor = 17 # rotation conversion, assuming linear
 
-        while not self.gRobotList:
-            print "waiting for robot to connect"
-            time.sleep(0.1)
 
-        print "connected to robot in update_virtual_robot"
-
-        while not g.gQuit:
-            if self.gRobotList is not None:
-                robot = self.gRobotList[0]
-                robot.set_wheel_balance(-3)
-                t = time.time()
-                del_t = t - self.vrobot.t
-                self.vrobot.t = t # update the tick
-                if self.vrobot.sl == self.vrobot.sr:
-                    self.vrobot.x = self.vrobot.x + self.vrobot.sl * del_t * math.sin(self.vrobot.a) * d_factor
-                    self.vrobot.y = self.vrobot.y + self.vrobot.sl * del_t * math.cos(self.vrobot.a) * d_factor
-                if self.vrobot.sl == -self.vrobot.sr:
-                    self.vrobot.a = self.vrobot.a + (self.vrobot.sl * del_t)/a_factor 
-                #update sensors
-                prox_l = robot.get_proximity(0)
-                prox_r = robot.get_proximity(1)
-                if (prox_l > noise_prox):
-                    self.vrobot.dist_l = (100 - prox_l)*p_factor
-                else:
-                    self.vrobot.dist_l = False
-                if (prox_r > noise_prox):
-                    self.vrobot.dist_r = (100 - prox_r)*p_factor
-                else:
-                    self.vrobot.dist_r = False
+        if self.gRobotList is not None:
+            robot = self.gRobotList[robotIndex]
+            vrobot = self.vrobots[robotIndex]
+            robot.set_wheel_balance(-3)
+            t = time.time()
+            del_t = t - vrobot.t
+            vrobot.t = t # update the tick
+            if vrobot.sl == vrobot.sr:
+                vrobot.x = vrobot.x + vrobot.sl * del_t * math.sin(vrobot.a) * d_factor
+                vrobot.y = vrobot.y + vrobot.sl * del_t * math.cos(vrobot.a) * d_factor
+            if vrobot.sl == vrobot.sr:
+                vrobot.a = vrobot.a + (vrobot.sl * del_t)/a_factor
+            #update sensors
+            prox_l = robot.get_proximity(0)
+            prox_r = robot.get_proximity(1)
+            if (prox_l > noise_prox):
+                vrobot.dist_l = (100 - prox_l)*p_factor
+            else:
+                vrobot.dist_l = False
+            if (prox_r > noise_prox):
+                vrobot.dist_r = (100 - prox_r)*p_factor
+            else:
+                vrobot.dist_r = False
                 
-                floor_l = robot.get_floor(0)
-                floor_r = robot.get_floor(1)
-                if (floor_l < noise_floor):
-                    self.vrobot.floor_l = floor_l
-                else:
-                    self.vrobot.floor_l = False
-                if (floor_r < noise_floor):
-                    self.vrobot.floor_r = floor_r
-                else:
-                    self.vrobot.floor_r = False
-            time.sleep(0.05)
+            floor_l = robot.get_floor(0)
+            floor_r = robot.get_floor(1)
+            if (floor_l < noise_floor):
+                vrobot.floor_l = floor_l
+            else:
+                vrobot.floor_l = False
+            if (floor_r < noise_floor):
+                vrobot.floor_r = floor_r
+            else:
+                vrobot.floor_r = False
+        time.sleep(0.05)
 
 
 def human_turn():
@@ -430,231 +454,237 @@ def stopProg(event=None):
 
 # NON JOYSTICK ONES
 
-def move_forward(robotIndex):
-    if g.comm.robotList:
-        # robot = g.comm.robotList[0]
-        robot = g.comm.robotList[robotIndex]
-        self.vrobot.sl = 15
-        self.vrobot.sr = 15   
+# def move_forward(robotIndex):
+#     if g.comm.robotList:
+#         # robot = g.comm.robotList[0]
+#         robot = g.comm.robotList[robotIndex]
+#         self.vrobot.sl = 15
+#         self.vrobot.sr = 15   
 
-        robot.set_wheel(0,self.vrobot.sl)
-        robot.set_wheel(1,self.vrobot.sr)
-        time.sleep(0.5)
+#         robot.set_wheel(0,self.vrobot.sl)
+#         robot.set_wheel(1,self.vrobot.sr)
+#         time.sleep(0.5)
 
-        print "initial move forward"
+#         print "initial move forward"
 
-        leftFloor = robot.get_floor(0)
-        rightFloor = robot.get_floor(1)
+#         leftFloor = robot.get_floor(0)
+#         rightFloor = robot.get_floor(1)
 
-        while not (leftFloor < 40 and rightFloor < 40):
-            print "while loop: floorleft %d floorright %d" % (leftFloor, rightFloor)
-            if rightFloor < 40: # right floor sensor sees black, robot turns right
-                self.vrobot.sl = 15
-                self.vrobot.sr = -15  
-            elif leftFloor < 40: # left floor sensor sees black, robot turns left
-                self.vrobot.sl = -15
-                self.vrobot.sr = 15   
-            else:
-                self.vrobot.sl = 15
-                self.vrobot.sr = 15   
-            robot.set_wheel(0, self.vrobot.sl)
-            robot.set_wheel(1, self.vrobot.sr)
+#         while not (leftFloor < 40 and rightFloor < 40):
+#             print "while loop: floorleft %d floorright %d" % (leftFloor, rightFloor)
+#             if rightFloor < 40: # right floor sensor sees black, robot turns right
+#                 self.vrobot.sl = 15
+#                 self.vrobot.sr = -15  
+#             elif leftFloor < 40: # left floor sensor sees black, robot turns left
+#                 self.vrobot.sl = -15
+#                 self.vrobot.sr = 15   
+#             else:
+#                 self.vrobot.sl = 15
+#                 self.vrobot.sr = 15   
+#             robot.set_wheel(0, self.vrobot.sl)
+#             robot.set_wheel(1, self.vrobot.sr)
 
-            time.sleep(0.01)
+#             time.sleep(0.01)
 
-            leftFloor = robot.get_floor(0)
-            rightFloor = robot.get_floor(1)
+#             leftFloor = robot.get_floor(0)
+#             rightFloor = robot.get_floor(1)
 
-        self.vrobot.sl = 0
-        self.vrobot.sr = 0
-        robot.set_wheel(0, 0)
-        robot.set_wheel(1, 0)
+#         self.vrobot.sl = 0
+#         self.vrobot.sr = 0
+#         robot.set_wheel(0, 0)
+#         robot.set_wheel(1, 0)
 
-        self.vrobot.t = time.time()
-
-
-def turn(direction, robotIndex):
-    ''' direction: -1 for left, 1 for right '''
-    if g.comm.robotList:
-        robot = g.comm.robotList[robotIndex]
-
-        leftFloor = robot.get_floor(0)
-        rightFloor = robot.get_floor(1)
-
-        # move forward until both white
-        while not (leftFloor > 40 and rightFloor > 40):
-            self.vrobot.sl = 15
-            self.vrobot.sr = 15
-            robot.set_wheel(0, self.vrobot.sl)
-            robot.set_wheel(1, self.vrobot.sr)
-            leftFloor = robot.get_floor(0)
-            rightFloor = robot.get_floor(1)
-            time.sleep(0.01)
-
-        self.vrobot.sl = 0
-        self.vrobot.sr = 0
-        robot.set_wheel(0, 0)
-        robot.set_wheel(1, 0)
-
-        # turn in direction until hits black then hits white again
-
-        seenBlack = False
-        if direction == -1:
-            floorDir = 0
-        elif direction == 1:
-            floorDir = 1
-
-        floor = robot.get_floor(floorDir)
-        while True:
-            if floor < 40:
-                seenBlack = True
-                self.vrobot.sl = 15 * direction
-                self.vrobot.sr = -15 * direction
-                robot.set_wheel(0, self.vrobot.sl)
-                robot.set_wheel(1, self.vrobot.sr)
-            elif floor > 40 and seenBlack:
-                # stop
-                time.sleep(0.2) # move a bit extra
-                self.vrobot.sl = 0
-                self.vrobot.sr = 0
-                robot.set_wheel(0, 0)
-                robot.set_wheel(1, 0)
-                break
-            else:
-                self.vrobot.sl = 15 * direction
-                self.vrobot.sr = -15 * direction
-                robot.set_wheel(0, self.vrobot.sl)
-                robot.set_wheel(1, self.vrobot.sr)
-
-            time.sleep(0.01)
-
-            floor = robot.get_floor(floorDir)
-
-def launch_move_north(direction, robotIndex=0):
-    turn_right_thread = threading.Thread(target=move_north, args=(direction, robotIndex))
-    turn_right_thread.daemon = True
-    turn_right_thread.start()
-
-def launch_move_south(direction, robotIndex=0):
-    turn_right_thread = threading.Thread(target=move_south, args=(direction, robotIndex))
-    turn_right_thread.daemon = True
-    turn_right_thread.start()
-
-def launch_move_east(direction, robotIndex=0):
-    turn_right_thread = threading.Thread(target=move_east, args=(direction, robotIndex))
-    turn_right_thread.daemon = True
-    turn_right_thread.start()
-
-def launch_move_west(direction, robotIndex=0):
-    turn_right_thread = threading.Thread(target=move_west, args=(direction, robotIndex))
-    turn_right_thread.daemon = True
-    turn_right_thread.start()
-
-def move_north(direction, robotIndex):
-    if g.comm.robotList:   
-        robot = g.comm.robotList[robotIndex]
-
-        if direction == "NORTH":
-            move_forward(robotIndex)
-
-        elif direction == "EAST":
-            turn(-1, robotIndex)
-            move_forward(robotIndex)
-
-        elif direction == "WEST":
-            turn(1, robotIndex)
-            move_forward(robotIndex)
-
-        elif direction == "SOUTH":
-            turn(1, robotIndex)
-            turn(1, robotIndex)
-            move_forward(robotIndex)
-            # self.move_backward()
-
-        global lastMoveDirection
-        lastMoveDirection = "NORTH"
+#         self.vrobot.t = time.time()
 
 
-def move_south(direction, robotIndex):
-    if g.comm.robotList: 
-        robot = g.comm.robotList[robotIndex]
-        if direction == "NORTH":
-            turn(1, robotIndex)
-            turn(1, robotIndex)
-            move_forward(robotIndex)
-            # move_backward()
+# def turn(direction, robotIndex):
+#     ''' direction: -1 for left, 1 for right '''
+#     if g.comm.robotList:
+#         robot = g.comm.robotList[robotIndex]
 
-        elif direction == "EAST":
-            turn(1, robotIndex)
-            move_forward(robotIndex)
+#         leftFloor = robot.get_floor(0)
+#         rightFloor = robot.get_floor(1)
 
-        elif direction == "WEST":
-            turn(-1, robotIndex)
-            move_forward(robotIndex)
+#         # move forward until both white
+#         while not (leftFloor > 40 and rightFloor > 40):
+#             self.vrobot.sl = 15
+#             self.vrobot.sr = 15
+#             robot.set_wheel(0, self.vrobot.sl)
+#             robot.set_wheel(1, self.vrobot.sr)
+#             leftFloor = robot.get_floor(0)
+#             rightFloor = robot.get_floor(1)
+#             time.sleep(0.01)
 
-        elif direction == "SOUTH":
-            move_forward(robotIndex)
+#         self.vrobot.sl = 0
+#         self.vrobot.sr = 0
+#         robot.set_wheel(0, 0)
+#         robot.set_wheel(1, 0)
 
-        global lastMoveDirection
-        lastMoveDirection = "SOUTH"
+#         # turn in direction until hits black then hits white again
 
-def move_east(direction, robotIndex):
-    if g.comm.robotList: 
-        robot = g.comm.robotList[robotIndex]
-        if direction == "NORTH":
-            turn(1, robotIndex)
-            move_forward(robotIndex)
+#         seenBlack = False
+#         if direction == -1:
+#             floorDir = 0
+#         elif direction == 1:
+#             floorDir = 1
 
-        elif direction == "EAST":
-            move_forward(robotIndex)
+#         floor = robot.get_floor(floorDir)
+#         while True:
+#             if floor < 40:
+#                 seenBlack = True
+#                 self.vrobot.sl = 15 * direction
+#                 self.vrobot.sr = -15 * direction
+#                 robot.set_wheel(0, self.vrobot.sl)
+#                 robot.set_wheel(1, self.vrobot.sr)
+#             elif floor > 40 and seenBlack:
+#                 # stop
+#                 time.sleep(0.2) # move a bit extra
+#                 self.vrobot.sl = 0
+#                 self.vrobot.sr = 0
+#                 robot.set_wheel(0, 0)
+#                 robot.set_wheel(1, 0)
+#                 break
+#             else:
+#                 self.vrobot.sl = 15 * direction
+#                 self.vrobot.sr = -15 * direction
+#                 robot.set_wheel(0, self.vrobot.sl)
+#                 robot.set_wheel(1, self.vrobot.sr)
 
-        elif direction == "WEST":
-            turn(1, robotIndex)
-            turn(1, robotIndex)
-            move_forward(robotIndex)
-            # move_backward()
+#             time.sleep(0.01)
 
-        elif direction == "SOUTH":
-            turn(-1, robotIndex)
-            move_forward(robotIndex)
+#             floor = robot.get_floor(floorDir)
 
-        global lastMoveDirection
-        lastMoveDirection = "EAST"
+# def launch_move_north(direction, robotIndex=0):
+#     turn_right_thread = threading.Thread(target=move_north, args=(direction, robotIndex))
+#     turn_right_thread.daemon = True
+#     turn_right_thread.start()
 
-def move_west(direction, robotIndex):
-    if g.comm.robotList: 
-        robot = g.comm.robotList[robotIndex]
-        if direction == "NORTH":
-            turn(-1, robotIndex)
-            move_forward(robotIndex)
+# def launch_move_south(direction, robotIndex=0):
+#     turn_right_thread = threading.Thread(target=move_south, args=(direction, robotIndex))
+#     turn_right_thread.daemon = True
+#     turn_right_thread.start()
 
-        elif direction == "EAST":
-            turn(1, robotIndex)
-            turn(1, robotIndex)
-            move_forward(robotIndex)
-            # move_backward()
+# def launch_move_east(direction, robotIndex=0):
+#     turn_right_thread = threading.Thread(target=move_east, args=(direction, robotIndex))
+#     turn_right_thread.daemon = True
+#     turn_right_thread.start()
 
-        elif direction == "WEST":
-            move_forward(robotIndex)
+# def launch_move_west(direction, robotIndex=0):
+#     turn_right_thread = threading.Thread(target=move_west, args=(direction, robotIndex))
+#     turn_right_thread.daemon = True
+#     turn_right_thread.start()
 
-        elif direction == "SOUTH":
-            turn(1, robotIndex)
-            move_forward(robotIndex)
+# def move_north(direction, robotIndex):
+#     if g.comm.robotList:   
+#         robot = g.comm.robotList[robotIndex]
 
-        global lastMoveDirection
-        lastMoveDirection = "WEST"
+#         if direction == "NORTH":
+#             move_forward(robotIndex)
+
+#         elif direction == "EAST":
+#             turn(-1, robotIndex)
+#             move_forward(robotIndex)
+
+#         elif direction == "WEST":
+#             turn(1, robotIndex)
+#             move_forward(robotIndex)
+
+#         elif direction == "SOUTH":
+#             turn(1, robotIndex)
+#             turn(1, robotIndex)
+#             move_forward(robotIndex)
+#             # self.move_backward()
+
+#         global lastMoveDirection
+#         lastMoveDirection = "NORTH"
+
+
+# def move_south(direction, robotIndex):
+#     if g.comm.robotList: 
+#         robot = g.comm.robotList[robotIndex]
+#         if direction == "NORTH":
+#             turn(1, robotIndex)
+#             turn(1, robotIndex)
+#             move_forward(robotIndex)
+#             # move_backward()
+
+#         elif direction == "EAST":
+#             turn(1, robotIndex)
+#             move_forward(robotIndex)
+
+#         elif direction == "WEST":
+#             turn(-1, robotIndex)
+#             move_forward(robotIndex)
+
+#         elif direction == "SOUTH":
+#             move_forward(robotIndex)
+
+#         global lastMoveDirection
+#         lastMoveDirection = "SOUTH"
+
+# def move_east(direction, robotIndex):
+#     if g.comm.robotList: 
+#         robot = g.comm.robotList[robotIndex]
+#         if direction == "NORTH":
+#             turn(1, robotIndex)
+#             move_forward(robotIndex)
+
+#         elif direction == "EAST":
+#             move_forward(robotIndex)
+
+#         elif direction == "WEST":
+#             turn(1, robotIndex)
+#             turn(1, robotIndex)
+#             move_forward(robotIndex)
+#             # move_backward()
+
+#         elif direction == "SOUTH":
+#             turn(-1, robotIndex)
+#             move_forward(robotIndex)
+
+#         global lastMoveDirection
+#         lastMoveDirection = "EAST"
+
+# def move_west(direction, robotIndex):
+#     if g.comm.robotList: 
+#         robot = g.comm.robotList[robotIndex]
+#         if direction == "NORTH":
+#             turn(-1, robotIndex)
+#             move_forward(robotIndex)
+
+
+#         elif direction == "EAST":
+#             turn(1, robotIndex)
+#             turn(1, robotIndex)
+#             move_forward(robotIndex)
+#             # move_backward()
+
+#         elif direction == "WEST":
+#             move_forward(robotIndex)
+
+#         elif direction == "SOUTH":
+#             turn(1, robotIndex)
+#             move_forward(robotIndex)
+
+#         global lastMoveDirection
+#         lastMoveDirection = "WEST"
 
 
 def draw_virtual_world(virtual_world, joystick):
     time.sleep(1) # give time for robot to connect.
     while not g.gQuit:
         if joystick.gRobotList is not None:
-            virtual_world.draw_robot()
-            virtual_world.draw_prox("left")
-            virtual_world.draw_prox("right")
-            virtual_world.draw_floor("left")
-            virtual_world.draw_floor("right")
+            for agentIndex in range(3):
+            
+                virtual_world.draw_robot(agentIndex)
+                virtual_world.draw_prox("left", agentIndex)
+                virtual_world.draw_prox("right", agentIndex)
+                virtual_world.draw_floor("left", agentIndex)
+                virtual_world.draw_floor("right", agentIndex)
         time.sleep(0.1)
+
+
+
 
 # one run of this function corresponds to one 'turn' in the game
 # pacman and all ghosts move once, and game state is updated
@@ -662,11 +692,12 @@ def draw_virtual_world(virtual_world, joystick):
 def nextTurn(gameState, gameMode):
     move_threads = []
 
+    print "turn started"
     currentState = gameState
 
     def move(currentState, agentIndex):
         legalActions = gameState.getLegalMoves(agentIndex)
-        if gameMode == "Human" and agentIndex == 0:
+            if gameMode == "Human" and agentIndex == 0:
             while True:
                 action = human_turn()
                 if action in legalActions:
@@ -675,7 +706,7 @@ def nextTurn(gameState, gameMode):
                     print "Action is not legal."
         else:
             action = legalActions[random.randrange(0, len(legalActions))] # choose action randomly
-
+            
         currentState = currentState.generateSuccessor(agentIndex, action)
 
         if action == "NORTH":
@@ -688,7 +719,7 @@ def nextTurn(gameState, gameMode):
             move = joystick.launch_move_south
     
         # TODO - which robot do we move
-        moveThread = threading.Thread(target=move, args=(gameState.directions[agentIndex], agentIndex)) # the none is the event thing
+        moveThread = threading.Thread(target=move, args=(None, gameState.directions[agentIndex], agentIndex)) # the none is the event thing
         moveThread.daemon = True
         moveThread.start()
 
@@ -698,7 +729,6 @@ def nextTurn(gameState, gameMode):
 
     if currentState.boostTimer > 0: # pacman gets to move twice
         move(currentState, 0)
-        
 
     for agentIndex in range(3):
         currentState = move(currentState, agentIndex)
@@ -711,9 +741,12 @@ def nextTurn(gameState, gameMode):
 
     if currentState.boostTimer > 0:
         currentState.boostTimer -= 1
+    print "turn finished"
+
     return currentState
 
 # This is run on a separate thread from the main thread so that we can wait for moves to complete
+
 def run_game(gameMode):
     while len(joystick.gRobotList) < 3:
         print "not enough robots"
@@ -764,22 +797,27 @@ def main(argv=None):
     joystick = Joystick(g.comm, g.m, rCanvas)
 
     # visual elements of the virtual robot
-    poly_points = [0,0,0,0,0,0,0,0]
-    joystick.vrobot.poly_id = rCanvas.create_polygon(poly_points, fill='blue') #robot
-    joystick.vrobot.prox_l_id = rCanvas.create_line(0,0,0,0, fill="red") #prox sensors
-    joystick.vrobot.prox_r_id = rCanvas.create_line(0,0,0,0, fill="red")
-    joystick.vrobot.floor_l_id = rCanvas.create_oval(0,0,0,0, outline="white", fill="white") #floor sensors
-    joystick.vrobot.floor_r_id = rCanvas.create_oval(0,0,0,0, outline="white", fill="white")
-
+    pacman_points = [0,0,0,0,0,0,0,0]
+    blinky_points = [120,120,120,120,120,120,120,120]
+    inky_points =[-120,-120,-120,-120,-120,-120,-120,-120]
+    poly_points = [pacman_points, blinky_points, inky_points]
+    colors = ['yellow', 'red', 'blue']
+    for agentIndex in range(3):
+        joystick.vrobots[agentIndex].poly_id = rCanvas.create_polygon(poly_points[agentIndex], fill=colors[agentIndex]) #robots, pacman, blinky(top right), inky(bottom left)
+        joystick.vrobots[agentIndex].prox_l_id = rCanvas.create_line(0,0,0,0, fill="red") #prox sensors
+        joystick.vrobots[agentIndex].prox_r_id = rCanvas.create_line(0,0,0,0, fill="red")
+        joystick.vrobots[agentIndex].floor_l_id = rCanvas.create_oval(0,0,0,0, outline="white", fill="white") #floor sensors
+        joystick.vrobots[agentIndex].floor_r_id = rCanvas.create_oval(0,0,0,0, outline="white", fill="white")
+    
     time.sleep(1)
 
-    update_vrobot_thread = threading.Thread(target=joystick.update_virtual_robot)
+    update_vrobot_thread = threading.Thread(target=joystick.update_all_virtual_robots)
     update_vrobot_thread.daemon = True
     update_vrobot_thread.start()
 
     #create the virtual worlds that contains the virtual robot
 
-    vWorld = virtual_world(drawQueue, joystick.vrobot, rCanvas, canvas_width, canvas_height)
+    vWorld = virtual_world(drawQueue, joystick.vrobots, rCanvas, canvas_width, canvas_height)
 
     ''' objects in the world '''
     rectangles = []
