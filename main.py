@@ -7,7 +7,12 @@ from tk_hamster_GUI import *
 import numpy as np
 import globalVars as g
 import graphics
+<<<<<<< HEAD
 import game, sys
+=======
+import game
+import random
+>>>>>>> 9b052373a2251b3e7684a2fc560a57eae0ef4079
 
 UPDATE_INTERVAL = 30
 
@@ -436,8 +441,8 @@ def nextTurn(gameState):
     move_threads = []
 
     for agentIndex in range(3):
-        legalActions = game.getLegalMoves(agentIndex)
-        action = legalActions[0]
+        legalActions = gameState.getLegalMoves(agentIndex)
+        action = legalActions[random.randrange(0, len(legalActions))] # choose action randomly
 
         successor = gameState.generateSuccessor(agentIndex, action)
 
@@ -468,7 +473,14 @@ def run_game():
         turnThread.daemon = True
         turnThread.start()
 
-    return game.score
+    if game.isWin():
+        print "Congratulations! You won!"
+    else:
+        print "Sorry, you lost..."
+
+    print "Score: ", game.score
+
+    # return game.score
 
 def main(argv=None): 
     global sleepTime
@@ -486,8 +498,10 @@ def main(argv=None):
     canvas_height = 200 # original 380half height
     rCanvas = tk.Canvas(g.m, bg="white", width=canvas_width*2, height=canvas_height*2)
     joystick = Joystick(g.comm, g.m, rCanvas)
-    
-    # # visual elements of the virtual robot 
+
+
+
+    # visual elements of the virtual robot 
     poly_points = [0,0,0,0,0,0,0,0]
     joystick.vrobot.poly_id = rCanvas.create_polygon(poly_points, fill='blue') #robot
     joystick.vrobot.prox_l_id = rCanvas.create_line(0,0,0,0, fill="red") #prox sensors
@@ -500,14 +514,15 @@ def main(argv=None):
     update_vrobot_thread = threading.Thread(target=joystick.update_virtual_robot)
     update_vrobot_thread.daemon = True
     update_vrobot_thread.start()
-    
+
     #create the virtual worlds that contains the virtual robot
+
     vWorld = virtual_world(drawQueue, joystick.vrobot, rCanvas, canvas_width, canvas_height)
 
     ''' objects in the world '''
     rectangles = []
 
-    #new map
+    # pacman map
     rectangles.append([-150, -150, 150, 150]) #overall square
     rectangles.append([-90, 90, -30, 30])
     rectangles.append([90, 90, 30, 30])
@@ -533,7 +548,9 @@ def main(argv=None):
     rCanvas.after(200, gui.updateCanvas, drawQueue)
     g.m.mainloop()
 
-    run()    
+    game_thread = threading.Thread(target=run)
+    game_thread.start()
+    # run()    
 
     for robot in joystick.gRobotList:
         robot.reset()
