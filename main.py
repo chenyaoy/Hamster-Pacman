@@ -377,6 +377,29 @@ def stopProg(event=None):
     print "Exit"
 
 
+# NON JOYSTICK ONES
+
+def launch_move_north(self, event=None, robotIndex=0):
+    turn_right_thread = threading.Thread(target=self.move_north, args=(lastMoveDirection, robotIndex))
+    turn_right_thread.daemon = True
+    turn_right_thread.start()
+
+def launch_move_south(self, event=None, robotIndex=0):
+    turn_right_thread = threading.Thread(target=self.move_south, args=(lastMoveDirection, robotIndex))
+    turn_right_thread.daemon = True
+    turn_right_thread.start()
+
+def launch_move_east(self, event=None, robotIndex=0):
+    turn_right_thread = threading.Thread(target=self.move_east, args=(lastMoveDirection, robotIndex))
+    turn_right_thread.daemon = True
+    turn_right_thread.start()
+
+def launch_move_west(self, event=None, robotIndex=0):
+    turn_right_thread = threading.Thread(target=self.move_west, args=(lastMoveDirection, robotIndex))
+    turn_right_thread.daemon = True
+    turn_right_thread.start()
+
+
 def draw_virtual_world(virtual_world, joystick):
     time.sleep(1) # give time for robot to connect.
     while not g.gQuit:
