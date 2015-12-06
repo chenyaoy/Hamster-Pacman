@@ -25,7 +25,6 @@ class GameState():
         self.lose = False
         self.win = False
         self.scoreChange = 0
-
         self.TIME_PENALTY = 1
 
         self.wallLocations = [(1, 1), (1, 3), (3, 1), (3, 3)]
@@ -40,9 +39,11 @@ class GameState():
             self.numFood = prevState.numFood
             self.positions = prevState.positions
             self.directions = prevState.directions
+            self.boostTimer = prevState.boostTimer
         else: # beginning game state
             self.score = 0
             self.numFood = 16
+            self.boostTimer = 0
             self.pills = [(0, 4), (4, 0)]
             self.positions = [(2, 2), (0, 0), (4, 4)]
             self.directions = ["NORTH", "NORTH", "NORTH"]
@@ -156,6 +157,7 @@ class GameState():
         # Eat capsule
         if position in state.getPills():
             # speed boost
+            state.boostTimer = 10
             state.pills.remove(position)
           # remove from virtual map
 
