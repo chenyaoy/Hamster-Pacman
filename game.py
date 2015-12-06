@@ -12,9 +12,9 @@ class Grid():
         self.data[key] = item
 
     def shallowCopy(self):
-    g = Grid(self.width, self.height)
-    g.data = self.data
-    return g
+        g = Grid(self.width, self.height)
+        g.data = self.data
+        return g
 
     def toString(self, grid):
         print "\n".join("\t".join(map(str,l)) for l in grid)
