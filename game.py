@@ -69,6 +69,12 @@ class GameState():
                 if self.walls[newPos[0]][newPos[1]]:
                     continue
 
+                if agentIndex != 0: # running into another ghost is not a valid move
+                    for otherAgent, otherPos in enumerate(self.positions[1:]): 
+                        if agentIndex != otherAgent:
+                            if newPos == otherPos:
+                                continue
+
                 if i == -1 and j == 0:
                     legalMoves.append("West")
                 if i == 1 and j == 0:
@@ -89,6 +95,10 @@ class GameState():
         # Let agent's logic deal with its action's effects on the board
         self.applyAction(agentIndex, state, action)
 
+        if state.positions[1] == state.positions[0] or state.positions[2] == state.positions[0]: # if ghost and pacman are in the same spot
+            state.lose = True
+            state.scoreChange += -100
+
         # Time passes
         if agentIndex == 0:
             state.scoreChange += -TIME_PENALTY # Penalty for waiting around
@@ -98,9 +108,28 @@ class GameState():
         state.score += state.scoreChange
         return state
 
+    def applyAction(agentIndex, state, action):
+        if action == "North":
+            i = 0
+            j = 1
+        elif action == "East":
+            i = 1
+            j = 0
+        elif action == "West":
+            i = -1
+            j = 0
+        elif action == "South":
+            i = 0
+            j = -1
+
+        state.positions[agentIndex][0] += i
+        state.positions[agentIndex][1] += j
+
+        if agentIndex == 0:
+            consume(state.positions[agentIndex], state)
 
     def consume( position, state ):
-        x,y = position
+        x, y = position
         # Eat food
         if state.food[x][y]:
             state.scoreChange += 10
@@ -112,7 +141,8 @@ class GameState():
 
         # Eat capsule
         if position in state.getPills():
-          state.pills.remove(position)
+            # speed boost
+            state.pills.remove(position)
           # remove from virtual map
 
     def getPills(self):
