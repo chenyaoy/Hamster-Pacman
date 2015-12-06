@@ -401,7 +401,7 @@ def human_turn():
     while True:
         move = str(sys.stdin.readline())[0].lower()
 
-        if move in ["w", "west]:
+        if move in ["w", "west"]:
             action = "West"
             print "move west"
             break
@@ -567,11 +567,9 @@ def main(argv=None):
     rectangles.append([90, -90, 30, -30])
     rectangles.append([100, 100, 140, 140])
     rectangles.append([-100, -100, -140, -140])
-    
 
     for rect in rectangles:
         vWorld.add_obstacle(rect)
-
 
     draw_world_thread = threading.Thread(target=draw_virtual_world, args=(vWorld, joystick))
     draw_world_thread.daemon = True
