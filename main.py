@@ -530,10 +530,12 @@ def nextTurn(gameState, gameMode):
     if currentState.boostTimer > 0: # pacman gets to move twice
         move(currentState, 0)
 
-    for agentIndex in range(3):
-        currentState = move(currentState, agentIndex)
-        if currentState.isWin() or currentState.isLose():
-            break
+    else:
+
+        for agentIndex in range(3):
+            currentState = move(currentState, agentIndex)
+            if currentState.isWin() or currentState.isLose():
+                break
 
     # wait for all three movements to be over
     for thread in move_threads:
