@@ -170,6 +170,11 @@ class GameState():
         y_position = -120 + (60*y)
         return (x_position, y_position)
     
+    def get_grid_coordinates(self, x, y):
+        x_position  = -120 + (60*x)
+        y_position = 120 - (60*y)
+        return (x_position, y_position)
+    
     def getPills(self):
         return self.pills
 

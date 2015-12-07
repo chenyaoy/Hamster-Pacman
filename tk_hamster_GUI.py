@@ -99,12 +99,16 @@ class virtual_world:
         self.canvas_height = canvas_height
         self.map = mp if mp is not None else []
         self.pellets = []
+        self.super_pellets =[]
         self.trace = trace #leave trace of robot
         self.prox_dots = prox_dots # draw obstacles detected as dots on map
         self.floor_dots = floor_dots
 
     def add_pellet(self, pill):
         self.pellets.append(pill)
+    
+    def add_super_pellet(self, super_pill):
+        self.super_pellets.append(super_pill)
     
     def add_obstacle(self,rect):
         self.map.append(rect)
@@ -114,6 +118,25 @@ class virtual_world:
         
     def draw_pellet(self, x1, y1, x2, y2):
         self.drawQueue.put(lambda: self.canvas.create_oval([x1, y1, x2, y2], fill='green'))
+    
+    def draw_super_pellet(self, x1, y1, x2, y2):
+        self.drawQueue.put(lambda: self.canvas.create_oval([x1, y1, x2, y2], fill='magenta'))
+    
+    def draw_food_layout(self, pellet_list):
+        for pellet_position in pellet_list:
+            x1 = pellet_position[0] -10
+            y1 = pellet_position[1] + 10
+            x2 = pellet_position[0] + 10
+            y2 = pellet_position[1] - 10
+            self.draw_pellet(x1, y1, x2, y2)
+            
+    def draw_super_pellets(self, super_pellet_list):
+        for super_pellet in super_pellet_list:
+            x1 = super_pellet[0] - 25
+            y1 = super_pellet[1] +25
+            x2 = super_pellet[0] + 25
+            y2 = super_pellet[1] - 25
+            self.draw_super_pellet(x1, y1, x2, y2)
     
     def draw_map(self):
         canvas_width = self.canvas_width
@@ -130,6 +153,12 @@ class virtual_world:
             x2 = canvas_width + pill[2]
             y2 = canvas_height - pill[3]
             self.draw_pellet(x1,y1, x2, y2)
+        for super_pill in self.super_pellets:
+            x1 = canvas_width + super_pill[0]
+            y1 = canvas_height - super_pill[1]
+            x2 = canvas_width + super_pill[2]
+            y2 = canvas_height - super_pill[3]
+            self.draw_super_pellet (x1, y1, x2, y2)
 
     def draw_robot(self, agentIndex):
         canvas_width = self.canvas_width

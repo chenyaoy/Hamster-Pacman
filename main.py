@@ -112,6 +112,8 @@ class Joystick:
         self.gRobotList = comm.robotList
         self.m = m
         self.vrobots = []
+        self.pellet_positions = []
+        self.super_pellet_positions = []
         for agentIndex in range(3):
             self.vrobots.append(virtual_robot(agentIndex))
             self.vrobots[agentIndex].t = time.time()
@@ -369,6 +371,7 @@ class Joystick:
                 print "waiting for robot to connect"
                 time.sleep(0.1)
             print self.gRobotList
+            
             for agentIndex in range(3):
                 self.update_virtual_robot(agentIndex)
 
@@ -427,6 +430,8 @@ def draw_virtual_world(virtual_world, joystick):
     time.sleep(1) # give time for robot to connect.
     while not gQuit:
         if joystick.gRobotList is not None:
+            virtual_world.draw_food_layout(joystick.pellet_positions)
+            virtual_world.draw_super_pellets(joystick.super_pellet_positions)
             for agentIndex in range(3):
                 virtual_world.draw_robot(agentIndex)
                 virtual_world.draw_prox("left", agentIndex)
@@ -435,6 +440,18 @@ def draw_virtual_world(virtual_world, joystick):
                 virtual_world.draw_floor("right", agentIndex)
         time.sleep(0.1)
 
+def updatePellets(currentState):
+    food_layout = currentState.food
+    for x in range(5):
+        for y in range(5):
+            if ((x == 0 and y == 0) or (x ==4 and y == 4)): #super_pellets
+                if food_layout[x][y]:
+                    grid_location = currentState.get_grid_coordinates(x, y)
+                    joystick.super_pellet_positions.append(grid_location)
+            else:
+                if food_layout[x][y]:
+                    grid_location = currentState.get_grid_coordinates(x, y)
+                    joystick.pellet_positions.append(grid_location)
 
 def human_turn():
     print "n-for North \n s-for South \n e- for East \n w- for west"
@@ -490,7 +507,7 @@ def nextTurn(gameState, gameMode):
             action = legalActions[random.randrange(0, len(legalActions))] # choose action randomly
 
         currentState = currentState.generateSuccessor(agentIndex, action)
-
+        
         if action == "NORTH":
             move = joystick.launch_move_north
         elif action == "EAST":
@@ -546,6 +563,8 @@ def nextTurn(gameState, gameMode):
             vAgent.a = math.pi
         else:
             raise Exception("direction not in NSEW")
+
+    updatePellets(currentState)
 
     return currentState
 
@@ -628,6 +647,7 @@ def main(argv=None):
     ''' objects in the world '''
     rectangles = []
     pellets = []
+    super_pellets = []
     
     # pacman map/walls
     rectangles.append([-150, -150, 150, 150]) #overall square
@@ -645,7 +665,7 @@ def main(argv=None):
             y_position = 120 - (60*index_y)
             if (index_x == 0 and index_y == 0) or (index_x == 4 and index_y == 4):
                 new_super_pellet = [(x_position - 25), (y_position + 25), (x_position+25), (y_position-25)]
-                pellets.append(new_super_pellet)
+                super_pellets.append(new_super_pellet)
             elif not ((index_x == 0 and index_y == 4) or (index_x ==2 and index_y == 2) or (index_x ==4 and index_y ==4) or (index_x == 1 and index_y == 1) or (index_x == 3 and index_y == 1) or (index_x == 1 and index_y == 3) or (index_x==3 and index_y==3) or (index_x == 4 and index_y==0)):
                 new_pellet = [(x_position - 10), (y_position +10), (x_position +10), (y_position-10)]
                 pellets.append(new_pellet)
@@ -653,6 +673,8 @@ def main(argv=None):
 
     for pill in pellets:
         vWorld.add_pellet(pill)
+    for super_pill in super_pellets:
+        vWorld.add_super_pellet(super_pill)
 
 
     for rect in rectangles:
