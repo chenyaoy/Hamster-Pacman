@@ -118,7 +118,7 @@ class virtual_world:
         self.map.append(rect)
 
     def draw_rect(self, x1, y1, x2, y2):
-        self.drawQueue.put(lambda: self.canvas.create_rectangle([x1,y1,x2,y2], fill=None))
+        self.drawQueue.put(lambda: self.canvas.create_rectangle([x1,y1,x2,y2], fill=None, outline='blue', width=10))
         
     def draw_pellet(self, x1, y1, x2, y2, grid_x, grid_y):
         self.pellet_ids[grid_x][grid_y] = self.canvas.create_oval([x1, y1, x2, y2], fill='green')
@@ -131,9 +131,16 @@ class virtual_world:
     def add_score_label(self, coordinates):
         x = self.canvas_width + coordinates[0]
         y = self.canvas_height - coordinates[1]
-        self.score_label = self.canvas.create_text(x-25, y, text="Score:")
-        self.score_points = self.canvas.create_text(x, y, text= "0")
-        self.drawQueue.put(lambda: self.score_label)
+        rect_x1 =  x- 25
+        rect_y1 = y+25
+        rect_x2 = x+25
+        rect_y2=  y-25
+        self.score_label = self.canvas.create_text(x-35, y, text="Score:", font=("Times", 20), fill='white')
+        self.score_points = self.canvas.create_text(x, y, text= "0", font=("Times", 20), fill= 'white')
+#        self.drawQueue.put(lambda: self.canvas.create_rectange([rect_x1, rect_y1, rect_y1, rect_y2], fill='black'))
+
+
+
     
     def update_score(self, score):
         self.canvas.itemconfig(self.score_points, text= str(score))

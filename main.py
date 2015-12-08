@@ -629,7 +629,7 @@ def main(argv=None):
 
     canvas_width = 500 #original: 700 # half width
     canvas_height = 200 # original 380half height
-    rCanvas = tk.Canvas(m, bg="white", width=canvas_width*2, height=canvas_height*2)
+    rCanvas = tk.Canvas(m, bg="black", width=canvas_width*2, height=canvas_height*2)
 
     global joystick
     
@@ -679,7 +679,7 @@ def main(argv=None):
                 new_pellet = [x_position, y_position]
                 pellets.append(new_pellet)
 
-    vWorld.add_score_label([175, -175])
+    vWorld.add_score_label([175,-175])
 
     for pill in pellets:
         vWorld.add_pellet(pill)
