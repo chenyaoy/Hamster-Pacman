@@ -58,11 +58,6 @@ class VirtualWorldGui:
         Human_thread= threading.Thread(target=human_game)
         Human_thread.daemon = True
         Human_thread.start()
-    
-    def startNavigateThread(self, event=None):
-        navigation_thread = threading.Thread(target=self.navigate)
-        navigation_thread.daemon = True
-        navigation_thread.start()
 
     def resetvRobot(self, event=None):
         for agentIndex in range(3):
@@ -367,10 +362,10 @@ class Joystick:
 
     def update_all_virtual_robots(self):
         while not gQuit:
-#            while not len(self.gRobotList) <:
-#                print "waiting for robot to connect"
-#                time.sleep(0.1)
-#            print self.gRobotList
+            while len(self.gRobotList) < 3:
+                print "waiting for robot to connect"
+                time.sleep(0.1)
+            print self.gRobotList
 
             for agentIndex in range(3):
                 self.update_virtual_robot(agentIndex)
@@ -421,6 +416,7 @@ class Joystick:
 
 
 def stopProg(event=None):
+    global m
     m.quit()
     gQuit = True
     print "Exit"
@@ -475,7 +471,7 @@ pacman and all ghosts move once, and game state is updated
 def nextTurn(gameState, gameMode):
 
     move_threads = []
-
+    
     currentState = gameState
     
     old_agent_directions = gameState.directions[:]
@@ -611,12 +607,12 @@ def main(argv=None):
 
     joystick = Joystick(comm, m, rCanvas)
 
-    # visual elements of the virtual robot
+    # visual elements of the virtual robots
     pacman_points = [0,0,0,0,0,0,0,0]
     blinky_points = [120,120,120,120,120,120,120,120]
     inky_points =[-120,-120,-120,-120,-120,-120,-120,-120]
     poly_points = [pacman_points, blinky_points, inky_points]
-    colors = ['yellow', 'red', 'blue']
+    colors = ['yellow', 'red', 'cyan']
     for agentIndex in range(3):
         joystick.vrobots[agentIndex].poly_id = rCanvas.create_polygon(poly_points[agentIndex], fill=colors[agentIndex]) #robots, pacman, blinky(top right), inky(bottom left)
         joystick.vrobots[agentIndex].prox_l_id = rCanvas.create_line(0,0,0,0, fill="red") #prox sensors
@@ -625,10 +621,6 @@ def main(argv=None):
         joystick.vrobots[agentIndex].floor_r_id = rCanvas.create_oval(0,0,0,0, outline="white", fill="white")
     
     time.sleep(1)
-
-#    update_vrobot_thread = threading.Thread(target=joystick.update_all_virtual_robots)
-#    update_vrobot_thread.daemon = True
-#    update_vrobot_thread.start()
 
     #create the virtual worlds that contains the virtual robot
 
@@ -664,8 +656,6 @@ def main(argv=None):
         vWorld.add_pellet(pill)
     for super_pill in super_pellets:
         vWorld.add_super_pellet(super_pill)
-
-
     for rect in rectangles:
         vWorld.add_obstacle(rect)
 
