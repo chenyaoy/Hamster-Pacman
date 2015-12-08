@@ -74,11 +74,19 @@ class GameState():
                 if self.walls[newPos[0]][newPos[1]]:
                     continue
 
-                if agentIndex != 0: # running into another ghost is not a valid move
-                    for otherAgent, otherPos in enumerate(self.positions[1:]): 
-                        if agentIndex != otherAgent:
-                            if newPos == otherPos:
-                                continue
+                # ghosts shouldn't collide
+                if agentIndex == 1:
+                    if self.positions[2] == newPos:
+                        continue
+                elif agentIndex == 2:
+                    if self.positions[1] == newPos:
+                        continue
+
+                # if agentIndex != 0: # running into another ghost is not a valid move
+                #     for otherAgent, otherPos in enumerate(self.positions[1:]): 
+                #         if agentIndex != otherAgent:
+                #             if newPos == otherPos:
+                #                 continue
 
                 if i == -1 and j == 0:
                     legalMoves.append("WEST")
