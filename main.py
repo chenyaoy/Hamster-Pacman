@@ -52,14 +52,19 @@ class VirtualWorldGui:
 
 
     def AI_mode(self, event=None):
-        AI_thread = threading.Thread(target= AI_game)
-        AI_thread.daemon = True
-        AI_thread.start()
+        # AI_thread = threading.Thread(target= AI_game)
+        # AI_thread.daemon = True
+        # AI_thread.start()
+        run_game_thread = threading.Thread(target=run_game, args=("AI",))
+        run_game_thread.start()
     
     def Human_mode(self, event=None):
-        Human_thread= threading.Thread(target=human_game)
-        Human_thread.daemon = True
-        Human_thread.start()
+        # Human_thread= threading.Thread(target=human_game)
+        # Human_thread.daemon = True
+        # Human_thread.start()
+        run_game_thread = threading.Thread(target=run_game, args=("Human",))
+        run_game_thread.start()
+
 
     def resetvRobot(self, event=None):
         for agentIndex in range(3):
@@ -116,10 +121,10 @@ class Joystick:
             self.vrobots.append(virtual_robot(agentIndex))
             self.vrobots[agentIndex].t = time.time()
 
-        rCanvas.bind_all('<w>', self.launch_move_north)
-        rCanvas.bind_all('<s>', self.launch_move_south)
-        rCanvas.bind_all('<a>', self.launch_move_west)
-        rCanvas.bind_all('<d>', self.launch_move_east)
+        rCanvas.bind_all('<w>', self.joystick_move_north)
+        rCanvas.bind_all('<s>', self.joystick_move_south)
+        rCanvas.bind_all('<a>', self.joystick_move_west)
+        rCanvas.bind_all('<d>', self.joystick_move_east)
         rCanvas.bind_all('<x>', self.stop_move)
         self.canvas = rCanvas
         rCanvas.pack()
@@ -301,7 +306,6 @@ class Joystick:
             self.vrobot.t = time.time()  
 
 
-
     def launch_move_north(self, event=None, direction="NORTH", robotIndex=0):
         turn_right_thread = threading.Thread(target=self.move_north, args=(direction, robotIndex))
         turn_right_thread.daemon = True
@@ -327,6 +331,8 @@ class Joystick:
             # print "moving north:" 
             # print "last direction: ", direction
             # print "robot index:", robotIndex
+            # self.gRobotList[robotIndex].set_wheel_balance(-29)
+
             robot = self.gRobotList[robotIndex]
             vrobot = self.vrobots[robotIndex]
             if direction == "NORTH":
@@ -591,7 +597,8 @@ def nextTurn(gameState, gameMode):
 
     def move(currentState, agentIndex):
         legalActions = gameState.getLegalMoves(agentIndex)
-        if agentIndex == 0:
+        print "Agent: %s, legal actions: %s" %(agentIndex, legalActions)
+        if agentIndex == 0: # Pacman's move
             if gameMode == "Human":
                 while True:
                     action = human_turn()
@@ -599,17 +606,17 @@ def nextTurn(gameState, gameMode):
                         break
                     else:
                         print "Action is not legal."
-            else:
+            elif gameMode == "AI":
                 gameStateCopy = copy.deepcopy(gameState)
                 action = ai_turn(gameStateCopy)
                 print "AI wants to turn, ", action
                 move = str(sys.stdin.readline())[0].lower()
 
-        else:
+        else: # Ghosts' moves
             if currentState.directions[agentIndex] in legalActions:
                 action = currentState.directions[agentIndex]
             else:
-                action = legalActions[random.randrange(0, len(legalActions))] # choose action randomly
+                action = legalActions[np.random.randint(0, len(legalActions))] # choose action randomly
 
         currentState = currentState.generateSuccessor(agentIndex, action)
         
@@ -622,9 +629,8 @@ def nextTurn(gameState, gameMode):
         elif action == "SOUTH":
             move = joystick.launch_move_south
     
-        # TODO - which robot do we move
         print "moving robot %d to the %s. It's old direction was: %s" % (agentIndex, action, old_agent_directions[agentIndex])
-        moveThread = threading.Thread(target=move, args=(None, old_agent_directions[agentIndex], agentIndex)) # the none is the event thing
+        moveThread = threading.Thread(target=move, args=(None, old_agent_directions[agentIndex], agentIndex)) # the None is the event argument
         moveThread.daemon = True
         moveThread.start()
 
@@ -636,7 +642,6 @@ def nextTurn(gameState, gameMode):
         move(currentState, 0)
 
     else:
-
         for agentIndex in range(3):
             currentState = move(currentState, agentIndex)
             if currentState.isWin() or currentState.isLose():
@@ -671,6 +676,13 @@ def nextTurn(gameState, gameMode):
     return currentState
 
 
+def initialize_wheel_balance():
+    robots = joystick.gRobotList
+    robots[0].set_wheel_balance(7)
+    robots[1].set_wheel_balance(4)
+    robots[2].set_wheel_balance(-29)
+
+
 # This is run on a separate thread from the main thread so that we can wait for moves to complete
 def run_game(gameMode):
     while len(joystick.gRobotList) < 3:
@@ -678,6 +690,8 @@ def run_game(gameMode):
         time.sleep(1)
 
     time.sleep(3)
+
+    initialize_wheel_balance()
 
     gameState = game.GameState()
     print "starting game!"
@@ -779,9 +793,6 @@ def main(argv=None):
     draw_world_thread = threading.Thread(target=draw_virtual_world, args=(vWorld, joystick))
     draw_world_thread.daemon = True
     draw_world_thread.start()
-
-    run_game_thread = threading.Thread(target=run_game, args=("AI",))
-    run_game_thread.start()
 
     gui = VirtualWorldGui(vWorld, m)
 
