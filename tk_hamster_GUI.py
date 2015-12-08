@@ -156,10 +156,10 @@ class virtual_world:
 
     def draw_super_pellets(self, super_pellet_list):
         for super_pellet in super_pellet_list:
-            x1 = canvas_width +super_pellet[0] - 25
-            y1 = canvas_height - super_pellet[1] +25
-            x2 = canvas_width + super_pellet[0] + 25
-            y2 = canvas+height - super_pellet[1] - 25
+            x1 = canvas_width +super_pellet[0] - 15
+            y1 = canvas_height - super_pellet[1] +15
+            x2 = canvas_width + super_pellet[0] + 15
+            y2 = canvas+height - super_pellet[1] - 15
             self.draw_super_pellet(x1, y1, x2, y2)
 
     def coordinate_to_grid(self, coordinate):
