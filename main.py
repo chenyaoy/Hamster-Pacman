@@ -614,17 +614,17 @@ def nextTurn(gameState, gameMode):
         currentState = currentState.generateSuccessor(agentIndex, action)
         
         if action == "NORTH":
-            move = joystick.launch_move_north
+            move_fn = joystick.launch_move_north
         elif action == "EAST":
-            move = joystick.launch_move_east
+            move_fn = joystick.launch_move_east
         elif action == "WEST":
-            move = joystick.launch_move_west
+            move_fn = joystick.launch_move_west
         elif action == "SOUTH":
-            move = joystick.launch_move_south
+            move_fn = joystick.launch_move_south
     
         # TODO - which robot do we move
         print "moving robot %d to the %s. It's old direction was: %s" % (agentIndex, action, old_agent_directions[agentIndex])
-        moveThread = threading.Thread(target=move, args=(None, old_agent_directions[agentIndex], agentIndex)) # the none is the event thing
+        moveThread = threading.Thread(target=move_fn, args=(None, old_agent_directions[agentIndex], agentIndex)) # the none is the event thing
         moveThread.daemon = True
         moveThread.start()
 
@@ -676,8 +676,6 @@ def run_game(gameMode):
     while len(joystick.gRobotList) < 3:
         print "not enough robots"
         time.sleep(1)
-
-    time.sleep(3)
 
     gameState = game.GameState()
     print "starting game!"
