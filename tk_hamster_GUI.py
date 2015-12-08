@@ -192,10 +192,10 @@ class virtual_world:
             grid_y = self.coordinate_to_grid(pill[1])
             self.draw_pellet(x1,y1, x2, y2, grid_x, grid_y )
         for super_pill in self.super_pellets:
-            x1 = canvas_width + super_pill[0] - 25
-            y1 = canvas_height - super_pill[1] +25
-            x2 = canvas_width + super_pill[0] + 25
-            y2 = canvas_height - super_pill[1] - 25
+            x1 = canvas_width + super_pill[0] - 15
+            y1 = canvas_height - super_pill[1] +15
+            x2 = canvas_width + super_pill[0] + 15
+            y2 = canvas_height - super_pill[1] - 15
             grid_x = self.coordinate_to_grid(super_pill[0])
             grid_y = self.coordinate_to_grid(super_pill[1])
             self.draw_super_pellet(x1, y1, x2, y2, grid_x, grid_y)
