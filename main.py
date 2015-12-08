@@ -7,7 +7,7 @@ import threading
 from tk_hamster_GUI import *
 import numpy as np
 import game
-import random
+import random, copy
 
 UPDATE_INTERVAL = 30
 BOARD_SIZE = 5
@@ -155,13 +155,24 @@ class Joystick:
             rightFloor = robot.get_floor(1)
 
             # move forward until both white
-            while not (leftFloor > BLACK_CUTOFF and rightFloor > BLACK_CUTOFF):
+            # while not (leftFloor > BLACK_CUTOFF and rightFloor > BLACK_CUTOFF):
+
+            seenBlackLeft = False
+            seenBlackRight = False
+
+            # move forward until both have seen black and at least one is white
+            while (leftFloor < BLACK_CUTOFF and rightFloor < BLACK_CUTOFF) or (not seenBlackLeft and not seenBlackRight):
+                # print "forward moving inital: left %d right %d" % (leftFloor, rightFloor)
                 vrobot.sl = 15
                 vrobot.sr = 15
                 robot.set_wheel(0, vrobot.sl)
                 robot.set_wheel(1, vrobot.sr)
                 leftFloor = robot.get_floor(0)
+                if leftFloor < BLACK_CUTOFF:
+                    seenBlackLeft = True
                 rightFloor = robot.get_floor(1)
+                if rightFloor < BLACK_CUTOFF:
+                    seenBlackRight = True
                 time.sleep(0.01)
 
             vrobot.sl = 0
@@ -174,9 +185,10 @@ class Joystick:
             leftFloor = robot.get_floor(0)
             rightFloor = robot.get_floor(1)
 
+            # move til both black
             while not (leftFloor < BLACK_CUTOFF and rightFloor < BLACK_CUTOFF):
 
-                # print "while loop: floorleft %d floorright %d" % (leftFloor, rightFloor)
+                # print "while loop: left %d right %d" % (leftFloor, rightFloor)
                 if rightFloor < BLACK_CUTOFF: # right floor sensor sees black, robot turns right
                     vrobot.sl = 15
                     vrobot.sr = -15
@@ -212,7 +224,10 @@ class Joystick:
             rightFloor = robot.get_floor(1)
 
             # move forward until both white
-            while not (leftFloor > BLACK_CUTOFF and rightFloor > BLACK_CUTOFF):
+            # while not (leftFloor > BLACK_CUTOFF and rightFloor > BLACK_CUTOFF):
+
+            # move forward until something is white
+            while leftFloor < BLACK_CUTOFF and rightFloor < BLACK_CUTOFF:
                 vrobot.sl = 15
                 vrobot.sr = 15
                 robot.set_wheel(0, vrobot.sl)
@@ -227,37 +242,53 @@ class Joystick:
             robot.set_wheel(1, 0)
 
             # turn in direction until hits black then hits white again
-            seenBlack = False
+            
             if direction == -1:
                 floorDir = 0
             elif direction == 1:
                 floorDir = 1
 
+            turnCount = 1
+
+            if direction == -1:
+                #turning left
+                if leftFloor < BLACK_CUTOFF:
+                    turnCount += 1
+
+            elif direction == 1:
+                if rightFloor < BLACK_CUTOFF:
+                    turnCount += 1
+
             floor = robot.get_floor(floorDir)
-            while True:
-                if floor < BLACK_CUTOFF:
-                    seenBlack = True
-                    vrobot.sl = 15 * direction
-                    vrobot.sr = -15 * direction
-                    robot.set_wheel(0, vrobot.sl)
-                    robot.set_wheel(1, vrobot.sr)
-                elif floor > BLACK_CUTOFF and seenBlack:
-                    # stop
-                    time.sleep(0.3) # move a bit extra
-                    vrobot.sl = 0
-                    vrobot.sr = 0
-                    robot.set_wheel(0, 0)
-                    robot.set_wheel(1, 0)
-                    break
-                else:
-                    vrobot.sl = 15 * direction
-                    vrobot.sr = -15 * direction
-                    robot.set_wheel(0, vrobot.sl)
-                    robot.set_wheel(1, vrobot.sr)
 
-                time.sleep(0.01)
+            for i in range(turnCount):
 
-                floor = robot.get_floor(floorDir)
+                seenBlack = False
+
+                while True:
+                    if floor < BLACK_CUTOFF:
+                        seenBlack = True
+                        vrobot.sl = 15 * direction
+                        vrobot.sr = -15 * direction
+                        robot.set_wheel(0, vrobot.sl)
+                        robot.set_wheel(1, vrobot.sr)
+                    elif floor > BLACK_CUTOFF and seenBlack:
+                        # stop
+                        time.sleep(0.3) # move a bit extra
+                        vrobot.sl = 0
+                        vrobot.sr = 0
+                        robot.set_wheel(0, 0)
+                        robot.set_wheel(1, 0)
+                        break
+                    else:
+                        vrobot.sl = 15 * direction
+                        vrobot.sr = -15 * direction
+                        robot.set_wheel(0, vrobot.sl)
+                        robot.set_wheel(1, vrobot.sr)
+
+                    time.sleep(0.01)
+
+                    floor = robot.get_floor(floorDir)
             
     def stop_move(self, event=None):
         if self.gRobotList: 
@@ -499,6 +530,53 @@ def human_turn():
     return action
 
 
+# takes in a gameState and returns an action
+def ai_turn(gameState):
+
+    def evaluationFunction(gameState):
+        return gameState.score
+
+    def Vopt(gameState, depth, agent_index):
+            if gameState.isWin() or gameState.isLose():
+                return (gameState.score, None)
+            elif depth == 0:
+                return (evaluationFunction(gameState), None)
+
+            scores = []
+            actions = gameState.getLegalMoves(agent_index)
+
+            if agent_index == 0:
+                for action in actions:
+                    newState = gameState.generateSuccessor(agent_index, action)
+                    scores.append( (Vopt(newState, depth, agent_index + 1)[0] , action) )
+            elif agent_index == 1:
+                if gameState.directions[agent_index] in actions:
+                    newState = gameState.generateSuccessor(agent_index, gameState.directions[agent_index])
+                    scores.append( (Vopt(newState, depth, agent_index + 1)[0] , gameState.directions[agent_index]) )
+                else:
+                    for action in actions:
+                        newState = gameState.generateSuccessor(agent_index, action)
+                        scores.append( (Vopt(newState, depth, agent_index + 1)[0] , action) )
+            else:
+                if gameState.directions[agent_index] in actions:
+                    newState = gameState.generateSuccessor(agent_index, gameState.directions[agent_index])
+                    scores.append( (Vopt(newState, depth - 1, 0)[0] , gameState.directions[agent_index]) )
+                else:
+                    for action in actions:
+                        newState = gameState.generateSuccessor(agent_index, action)
+                        scores.append( (Vopt(newState, depth -1, 0)[0] , action) )
+
+
+            if agent_index == 0:
+                max_score = max(scores)[0]
+                max_choices = [score for score in scores if score[0] == max_score]
+                return random.choice(max_choices)
+                # return max(scores)
+            else:
+                return (sum([score for score, action in scores]) / len(scores), random.choice([action for score, action in scores]))
+
+    return Vopt(gameState, 4, 0)[1]
+
 '''
 one run of this function corresponds to one 'turn' in the game
 pacman and all ghosts move once, and game state is updated
@@ -513,15 +591,25 @@ def nextTurn(gameState, gameMode):
 
     def move(currentState, agentIndex):
         legalActions = gameState.getLegalMoves(agentIndex)
-        if gameMode == "Human" and agentIndex == 0:
-            while True:
-                action = human_turn()
-                if action in legalActions:
-                    break
-                else:
-                    print "Action is not legal."
+        if agentIndex == 0:
+            if gameMode == "Human":
+                while True:
+                    action = human_turn()
+                    if action in legalActions:
+                        break
+                    else:
+                        print "Action is not legal."
+            else:
+                gameStateCopy = copy.deepcopy(gameState)
+                action = ai_turn(gameStateCopy)
+                print "AI wants to turn, ", action
+                move = str(sys.stdin.readline())[0].lower()
+
         else:
-            action = legalActions[random.randrange(0, len(legalActions))] # choose action randomly
+            if currentState.directions[agentIndex] in legalActions:
+                action = currentState.directions[agentIndex]
+            else:
+                action = legalActions[random.randrange(0, len(legalActions))] # choose action randomly
 
         currentState = currentState.generateSuccessor(agentIndex, action)
         
@@ -692,7 +780,7 @@ def main(argv=None):
     draw_world_thread.daemon = True
     draw_world_thread.start()
 
-    run_game_thread = threading.Thread(target=run_game, args=("Human",))
+    run_game_thread = threading.Thread(target=run_game, args=("AI",))
     run_game_thread.start()
 
     gui = VirtualWorldGui(vWorld, m)
