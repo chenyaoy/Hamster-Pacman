@@ -154,8 +154,8 @@ class Joystick:
             leftFloor = robot.get_floor(0)
             rightFloor = robot.get_floor(1)
 
-            # move forward until both white
-            while not (leftFloor > BLACK_CUTOFF and rightFloor > BLACK_CUTOFF):
+            # move forward until at least one white
+            while (leftFloor < BLACK_CUTOFF and rightFloor < BLACK_CUTOFF):
                 vrobot.sl = 15
                 vrobot.sr = 15
                 robot.set_wheel(0, vrobot.sl)
@@ -169,7 +169,7 @@ class Joystick:
             robot.set_wheel(0, 0)
             robot.set_wheel(1, 0)
 
-            # time.sleep(0.2)
+            time.sleep(0.2)
 
             leftFloor = robot.get_floor(0)
             rightFloor = robot.get_floor(1)
