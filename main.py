@@ -577,7 +577,7 @@ def nextTurn(gameState, gameMode):
             vAgent.a = math.pi
         else:
             raise Exception("direction not in NSEW")
-    
+    joystick.score = currentState.score
     joystick.pellet_positions = currentState.food
 
     return currentState
@@ -610,7 +610,6 @@ def run_game(gameMode):
         print "Sorry, you lost..."
 
     print "Score: ", gameState.score
-    joystick.score = gameState.score
     stopProg()
 
 
