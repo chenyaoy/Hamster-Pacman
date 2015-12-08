@@ -17,7 +17,6 @@ m = None
 
 BLACK_CUTOFF = 75
 
-
 class VirtualWorldGui:
     def __init__(self, vWorld, m):
         self.vworld = vWorld
@@ -166,18 +165,18 @@ class Joystick:
             seenBlackRight = False
 
             # move forward until both have seen black and at least one is white
-            while (leftFloor < BLACK_CUTOFF and rightFloor < BLACK_CUTOFF) or (not seenBlackLeft and not seenBlackRight):
+            while (leftFloor < BLACK_CUTOFF and rightFloor < BLACK_CUTOFF):
                 # print "forward moving inital: left %d right %d" % (leftFloor, rightFloor)
                 vrobot.sl = 15
                 vrobot.sr = 15
                 robot.set_wheel(0, vrobot.sl)
                 robot.set_wheel(1, vrobot.sr)
                 leftFloor = robot.get_floor(0)
-                if leftFloor < BLACK_CUTOFF:
-                    seenBlackLeft = True
+                # if leftFloor < BLACK_CUTOFF:
+                #     seenBlackLeft = True
                 rightFloor = robot.get_floor(1)
-                if rightFloor < BLACK_CUTOFF:
-                    seenBlackRight = True
+                # if rightFloor < BLACK_CUTOFF:
+                #     seenBlackRight = True
                 time.sleep(0.01)
 
             vrobot.sl = 0
