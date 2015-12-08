@@ -51,8 +51,8 @@ class GameState():
             self.food = Grid(5, 5, True)
             # Locations where pacman, ghosts, and speed boosts start so there is no food there
             self.food[0][0] = False
-            self.food[0][4] = False
-            self.food[4][0] = False
+#            self.food[0][4] = False
+#            self.food[4][0] = False
             self.food[4][4] = False
             self.food[2][2] = False
             for wall in self.wallLocations:
@@ -167,6 +167,11 @@ class GameState():
     def get_coordinates(self, agentIndex):
         x, y = self.positions[agentIndex]
         x_position = -120 + (60*x)
+        y_position = -120 + (60*y)
+        return (x_position, y_position)
+    
+    def get_grid_coordinates(self, x, y):
+        x_position  = -120 + (60*x)
         y_position = -120 + (60*y)
         return (x_position, y_position)
     

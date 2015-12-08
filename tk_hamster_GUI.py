@@ -99,6 +99,8 @@ class virtual_world:
         self.canvas_height = canvas_height
         self.map = mp if mp is not None else []
         self.pellets = []
+        self.super_pellets =[]
+        self.pellet_ids = [[0 for x in range(5)] for x in range(5)]
         self.trace = trace #leave trace of robot
         self.prox_dots = prox_dots # draw obstacles detected as dots on map
         self.floor_dots = floor_dots
@@ -106,30 +108,85 @@ class virtual_world:
     def add_pellet(self, pill):
         self.pellets.append(pill)
     
+    def add_super_pellet(self, super_pill):
+        self.super_pellets.append(super_pill)
+    
+    
     def add_obstacle(self,rect):
         self.map.append(rect)
 
     def draw_rect(self, x1, y1, x2, y2):
         self.drawQueue.put(lambda: self.canvas.create_rectangle([x1,y1,x2,y2], fill=None))
         
-    def draw_pellet(self, x1, y1, x2, y2):
-        self.drawQueue.put(lambda: self.canvas.create_oval([x1, y1, x2, y2], fill='green'))
+    def draw_pellet(self, x1, y1, x2, y2, grid_x, grid_y):
+        self.pellet_ids[grid_x][grid_y] = self.canvas.create_oval([x1, y1, x2, y2], fill='green')
+        self.drawQueue.put(lambda: self.pellet_ids[grid_x][grid_y])
     
+    def draw_super_pellet(self, x1, y1, x2, y2, grid_x, grid_y):
+        self.pellet_ids[grid_x][grid_y] =self.canvas.create_oval([x1, y1, x2, y2], fill='magenta')
+        self.drawQueue.put(lambda: self.pellet_ids[grid_x][grid_y])
+    
+    def draw_food_layout(self, pellet_list):
+        if pellet_list:
+            for x in range(5):
+                for y in range(5):
+                    if not pellet_list[x][y]:
+                        if self.pellet_ids[x][y] != 0:
+                            self.canvas.delete(self.pellet_ids[x][y])
+                            self.pellet_ids[x][y] = 0
+        
+#        for pellet_position in pellet_list:
+#            x1 = canvas_width + pellet_position[0] -10
+#            y1 = canvas_height - pellet_position[1] + 10
+#            x2 = canvas_widht + pellet_position[0] + 10
+#            y2 = canvas_height - pellet_position[1] - 10
+#            self.draw_pellet(x1, y1, x2, y2)
+
+    def draw_super_pellets(self, super_pellet_list):
+        for super_pellet in super_pellet_list:
+            x1 = canvas_width +super_pellet[0] - 25
+            y1 = canvas_height - super_pellet[1] +25
+            x2 = canvas_width + super_pellet[0] + 25
+            y2 = canvas+height - super_pellet[1] - 25
+            self.draw_super_pellet(x1, y1, x2, y2)
+
+    def coordinate_to_grid(self, coordinate):
+        if coordinate == -120:
+            return 0
+        elif coordinate == -60:
+            return 1
+        elif coordinate == 0:
+            return 2
+        elif coordinate == 60:
+            return 3
+        elif coordinate == 120:
+            return 4
+
     def draw_map(self):
         canvas_width = self.canvas_width
         canvas_height = self.canvas_height
         for rect in self.map:
-            x1 = canvas_width + rect[0]
-            y1 = canvas_height - rect[1]
-            x2 = canvas_width + rect[2]
-            y2 = canvas_height - rect[3]
+            x1 = self.canvas_width + rect[0]
+            y1 = self.canvas_height - rect[1]
+            x2 = self.canvas_width + rect[2]
+            y2 = self.canvas_height - rect[3]
             self.draw_rect(x1, y1, x2, y2)
         for pill in self.pellets:
-            x1 = canvas_width + pill[0]
-            y1 = canvas_height - pill[1]
-            x2 = canvas_width + pill[2]
-            y2 = canvas_height - pill[3]
-            self.draw_pellet(x1,y1, x2, y2)
+            x1 = self.canvas_width + pill[0] - 10
+            y1 = self.canvas_height - pill[1] + 10
+            x2 = self.canvas_width + pill[0] + 10
+            y2 = self.canvas_height - pill[1] - 10
+            grid_x = self.coordinate_to_grid(pill[0])
+            grid_y = self.coordinate_to_grid(pill[1])
+            self.draw_pellet(x1,y1, x2, y2, grid_x, grid_y )
+        for super_pill in self.super_pellets:
+            x1 = canvas_width + super_pill[0] - 25
+            y1 = canvas_height - super_pill[1] +25
+            x2 = canvas_width + super_pill[0] + 25
+            y2 = canvas_height - super_pill[1] - 25
+            grid_x = self.coordinate_to_grid(super_pill[0])
+            grid_y = self.coordinate_to_grid(super_pill[1])
+            self.draw_super_pellet(x1, y1, x2, y2, grid_x, grid_y)
 
     def draw_robot(self, agentIndex):
         canvas_width = self.canvas_width
