@@ -126,6 +126,7 @@ class virtual_world:
         self.pellet_ids[grid_x][grid_y] =self.canvas.create_oval([x1, y1, x2, y2], fill='magenta')
         self.drawQueue.put(lambda: self.pellet_ids[grid_x][grid_y])
     
+    
     def draw_food_layout(self, pellet_list):
         if pellet_list:
             for x in range(5):
@@ -134,13 +135,6 @@ class virtual_world:
                         if self.pellet_ids[x][y] != 0:
                             self.canvas.delete(self.pellet_ids[x][y])
                             self.pellet_ids[x][y] = 0
-        
-#        for pellet_position in pellet_list:
-#            x1 = canvas_width + pellet_position[0] -10
-#            y1 = canvas_height - pellet_position[1] + 10
-#            x2 = canvas_widht + pellet_position[0] + 10
-#            y2 = canvas_height - pellet_position[1] - 10
-#            self.draw_pellet(x1, y1, x2, y2)
 
     def draw_super_pellets(self, super_pellet_list):
         for super_pellet in super_pellet_list:

@@ -14,7 +14,7 @@ BOARD_SIZE = 5
 gMaxRobotNum = 3 # max number of robots to control
 gQuit = False
 m = None
-BLACK_CUTOFF = 50
+BLACK_CUTOFF = 75
 
 class VirtualWorldGui:
     def __init__(self, vWorld, m):
@@ -169,7 +169,7 @@ class Joystick:
     def turn(self, direction, robotIndex):
         ''' direction: -1 for left, 1 for right '''
         if self.gRobotList:
-            print "turning robot %d to the %s" % (robotIndex, "left" if direction == - 1 else "right")
+#            print "turning robot %d to the %s" % (robotIndex, "left" if direction == - 1 else "right")
             robot = self.gRobotList[robotIndex]
             vrobot = self.vrobots[robotIndex]
             leftFloor = robot.get_floor(0)
@@ -219,7 +219,7 @@ class Joystick:
                     robot.set_wheel(0, vrobot.sl)
                     robot.set_wheel(1, vrobot.sr)
 
-                time.sleep(0.01)
+#                time.sleep(0.01)
 
                 floor = robot.get_floor(floorDir)
             
@@ -601,10 +601,10 @@ def main(argv=None):
 
     canvas_width = 500 #original: 700 # half width
     canvas_height = 200 # original 380half height
-    rCanvas = tk.Canvas(m, bg="white", width=canvas_width*2, height=canvas_height*2)
+    rCanvas = tk.Canvas(m, bg="black", width=canvas_width*2, height=canvas_height*2)
 
     global joystick
-
+    
     joystick = Joystick(comm, m, rCanvas)
 
     # visual elements of the virtual robots
@@ -625,7 +625,7 @@ def main(argv=None):
     #create the virtual worlds that contains the virtual robot
 
     vWorld = virtual_world(drawQueue, joystick.vrobots, rCanvas, canvas_width, canvas_height)
-
+    
     ''' objects in the world '''
     rectangles = []
     pellets = []
