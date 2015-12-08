@@ -49,10 +49,8 @@ class GameState():
             self.directions = ["NORTH", "NORTH", "NORTH"]
 
             self.food = Grid(5, 5, True)
-            # Locations where pacman, ghosts, and speed boosts start so there is no food there
+            # Locations where pacman and speed boosts start so there is no food there
             self.food[0][0] = False
-#            self.food[0][4] = False
-#            self.food[4][0] = False
             self.food[4][4] = False
             self.food[2][2] = False
             for wall in self.wallLocations:
