@@ -14,7 +14,7 @@ BOARD_SIZE = 5
 gMaxRobotNum = 3 # max number of robots to control
 gQuit = False
 m = None
-
+BLACK_CUTOFF = 50
 
 class VirtualWorldGui:
     def __init__(self, vWorld, m):
@@ -143,13 +143,13 @@ class Joystick:
             leftFloor = robot.get_floor(0)
             rightFloor = robot.get_floor(1)
 
-            while not (leftFloor < 40 and rightFloor < 40):
+            while not (leftFloor < BLACK_CUTOFF and rightFloor < BLACK_CUTOFF):
 
                 # print "while loop: floorleft %d floorright %d" % (leftFloor, rightFloor)
-                if rightFloor < 40: # right floor sensor sees black, robot turns right
+                if rightFloor < BLACK_CUTOFF: # right floor sensor sees black, robot turns right
                     vrobot.sl = 15
                     vrobot.sr = -15
-                elif leftFloor < 40: # left floor sensor sees black, robot turns left
+                elif leftFloor < BLACK_CUTOFF: # left floor sensor sees black, robot turns left
                     vrobot.sl = -15
                     vrobot.sr = 15
                 else:
@@ -158,7 +158,7 @@ class Joystick:
                 robot.set_wheel(0, vrobot.sl)
                 robot.set_wheel(1, vrobot.sr)
 
-                time.sleep(0.01)
+#time.sleep(0.01)
 
                 leftFloor = robot.get_floor(0)
                 rightFloor = robot.get_floor(1)
@@ -181,7 +181,7 @@ class Joystick:
             rightFloor = robot.get_floor(1)
 
             # move forward until both white
-            while not (leftFloor > 40 and rightFloor > 40):
+            while not (leftFloor > BLACK_CUTOFF and rightFloor > BLACK_CUTOFF):
                 vrobot.sl = 15
                 vrobot.sr = 15
                 robot.set_wheel(0, vrobot.sl)
@@ -204,13 +204,13 @@ class Joystick:
 
             floor = robot.get_floor(floorDir)
             while True:
-                if floor < 40:
+                if floor < BLACK_CUTOFF:
                     seenBlack = True
                     vrobot.sl = 15 * direction
                     vrobot.sr = -15 * direction
                     robot.set_wheel(0, vrobot.sl)
                     robot.set_wheel(1, vrobot.sr)
-                elif floor > 40 and seenBlack:
+                elif floor > BLACK_CUTOFF and seenBlack:
                     # stop
                     time.sleep(0.2) # move a bit extra
                     vrobot.sl = 0
@@ -367,11 +367,11 @@ class Joystick:
 
     def update_all_virtual_robots(self):
         while not gQuit:
-            while not len(self.gRobotList) < 3:
-                print "waiting for robot to connect"
-                time.sleep(0.1)
-            print self.gRobotList
-            
+#            while not len(self.gRobotList) <:
+#                print "waiting for robot to connect"
+#                time.sleep(0.1)
+#            print self.gRobotList
+
             for agentIndex in range(3):
                 self.update_virtual_robot(agentIndex)
 
@@ -383,7 +383,7 @@ class Joystick:
         a_factor = 17 # rotation conversion, assuming linear
 
 
-        if self.gRobotList is not None:
+        if len(self.gRobotList) >= 3:
             robot = self.gRobotList[robotIndex]
             vrobot = self.vrobots[robotIndex]
             robot.set_wheel_balance(-3)
@@ -431,7 +431,6 @@ def draw_virtual_world(virtual_world, joystick):
     while not gQuit:
         if joystick.gRobotList is not None:
             virtual_world.draw_food_layout(joystick.pellet_positions)
-            virtual_world.draw_super_pellets(joystick.super_pellet_positions)
             for agentIndex in range(3):
                 virtual_world.draw_robot(agentIndex)
                 virtual_world.draw_prox("left", agentIndex)
@@ -440,18 +439,7 @@ def draw_virtual_world(virtual_world, joystick):
                 virtual_world.draw_floor("right", agentIndex)
         time.sleep(0.1)
 
-def updatePellets(currentState):
-    food_layout = currentState.food
-    for x in range(5):
-        for y in range(5):
-            if ((x == 0 and y == 0) or (x ==4 and y == 4)): #super_pellets
-                if food_layout[x][y]:
-                    grid_location = currentState.get_grid_coordinates(x, y)
-                    joystick.super_pellet_positions.append(grid_location)
-            else:
-                if food_layout[x][y]:
-                    grid_location = currentState.get_grid_coordinates(x, y)
-                    joystick.pellet_positions.append(grid_location)
+
 
 def human_turn():
     print "n-for North \n s-for South \n e- for East \n w- for west"
@@ -565,8 +553,8 @@ def nextTurn(gameState, gameMode):
             vAgent.a = math.pi
         else:
             raise Exception("direction not in NSEW")
-
-    updatePellets(currentState)
+    
+    joystick.pellet_positions = currentState.food
 
     return currentState
 
@@ -638,9 +626,9 @@ def main(argv=None):
     
     time.sleep(1)
 
-    update_vrobot_thread = threading.Thread(target=joystick.update_all_virtual_robots)
-    update_vrobot_thread.daemon = True
-    update_vrobot_thread.start()
+#    update_vrobot_thread = threading.Thread(target=joystick.update_all_virtual_robots)
+#    update_vrobot_thread.daemon = True
+#    update_vrobot_thread.start()
 
     #create the virtual worlds that contains the virtual robot
 
@@ -657,19 +645,18 @@ def main(argv=None):
     rectangles.append([90, 90, 30, 30])
     rectangles.append([-90, -90, -30, -30])
     rectangles.append([90, -90, 30, -30])
-    rectangles.append([100, 100, 140, 140])
-    rectangles.append([-100, -100, -140, -140])
+
 
     #pacman pellets/capsules/food
     for index_x in range(BOARD_SIZE):
         for index_y in range(BOARD_SIZE):
             x_position = -120 + (60*index_x)
-            y_position = 120 - (60*index_y)
-            if (index_x == 0 and index_y == 0) or (index_x == 4 and index_y == 4):
-                new_super_pellet = [(x_position - 25), (y_position + 25), (x_position+25), (y_position-25)]
+            y_position = -120 + (60*index_y)
+            if (index_x == 0 and index_y == 4) or (index_x == 4 and index_y == 0):
+                new_super_pellet = [x_position, y_position]
                 super_pellets.append(new_super_pellet)
-            elif not ((index_x == 0 and index_y == 4) or (index_x ==2 and index_y == 2) or (index_x ==4 and index_y ==4) or (index_x == 1 and index_y == 1) or (index_x == 3 and index_y == 1) or (index_x == 1 and index_y == 3) or (index_x==3 and index_y==3) or (index_x == 4 and index_y==0)):
-                new_pellet = [(x_position - 10), (y_position +10), (x_position +10), (y_position-10)]
+            elif not ((index_x == 0 and index_y == 0) or (index_x ==2 and index_y == 2) or (index_x ==4 and index_y ==4) or (index_x == 1 and index_y == 1) or (index_x == 3 and index_y == 1) or (index_x == 1 and index_y == 3) or (index_x==3 and index_y==3)):
+                new_pellet = [x_position, y_position]
                 pellets.append(new_pellet)
 
 
