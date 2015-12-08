@@ -104,6 +104,8 @@ class virtual_world:
         self.trace = trace #leave trace of robot
         self.prox_dots = prox_dots # draw obstacles detected as dots on map
         self.floor_dots = floor_dots
+        self.score_label = None
+        self.score_points = None
 
     def add_pellet(self, pill):
         self.pellets.append(pill)
@@ -126,6 +128,15 @@ class virtual_world:
         self.pellet_ids[grid_x][grid_y] =self.canvas.create_oval([x1, y1, x2, y2], fill='magenta')
         self.drawQueue.put(lambda: self.pellet_ids[grid_x][grid_y])
     
+    def add_score_label(self, coordinates):
+        x = self.canvas_width + coordinates[0]
+        y = self.canvas_height - coordinates[1]
+        self.score_label = self.canvas.create_text(x-25, y, text="Score:")
+        self.score_points = self.canvas.create_text(x, y, text= "0")
+        self.drawQueue.put(lambda: self.score_label)
+    
+    def update_score(self, score):
+        self.canvas.itemconfig(self.score_points, text= str(score))
     
     def draw_food_layout(self, pellet_list):
         if pellet_list:

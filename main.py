@@ -14,7 +14,9 @@ BOARD_SIZE = 5
 gMaxRobotNum = 3 # max number of robots to control
 gQuit = False
 m = None
+
 BLACK_CUTOFF = 75
+
 
 class VirtualWorldGui:
     def __init__(self, vWorld, m):
@@ -109,6 +111,7 @@ class Joystick:
         self.vrobots = []
         self.pellet_positions = []
         self.super_pellet_positions = []
+        self.score = 0
         for agentIndex in range(3):
             self.vrobots.append(virtual_robot(agentIndex))
             self.vrobots[agentIndex].t = time.time()
@@ -117,9 +120,25 @@ class Joystick:
         rCanvas.bind_all('<s>', self.launch_move_south)
         rCanvas.bind_all('<a>', self.launch_move_west)
         rCanvas.bind_all('<d>', self.launch_move_east)
-
-        rCanvas.bind_all('<x>', self.stop_move)  
+        rCanvas.bind_all('<x>', self.stop_move)
+        self.canvas = rCanvas
         rCanvas.pack()
+
+    def joystick_move_north(self, event=None):
+        global lastMoveDirection
+        self.launch_move_north(event=None, direction=lastMoveDirection, robotIndex=0)
+
+    def joystick_move_east(self, event=None):
+        global lastMoveDirection
+        self.launch_move_east(event=None, direction=lastMoveDirection, robotIndex=0)
+
+    def joystick_move_west(self, event=None):
+        global lastMoveDirection
+        self.launch_move_west(event=None, direction=lastMoveDirection, robotIndex=0)
+
+    def joystick_move_south(self, event=None):
+        global lastMoveDirection
+        self.launch_move_south(event=None, direction=lastMoveDirection, robotIndex=0)
 
     def move_forward(self, robotIndex):
         if self.gRobotList:
@@ -131,9 +150,26 @@ class Joystick:
 
             robot.set_wheel(0, vrobot.sl)
             robot.set_wheel(1, vrobot.sr)
-            time.sleep(0.5)
 
-            print "initial move forward"
+            leftFloor = robot.get_floor(0)
+            rightFloor = robot.get_floor(1)
+
+            # move forward until both white
+            while not (leftFloor > BLACK_CUTOFF and rightFloor > BLACK_CUTOFF):
+                vrobot.sl = 15
+                vrobot.sr = 15
+                robot.set_wheel(0, vrobot.sl)
+                robot.set_wheel(1, vrobot.sr)
+                leftFloor = robot.get_floor(0)
+                rightFloor = robot.get_floor(1)
+                time.sleep(0.01)
+
+            vrobot.sl = 0
+            vrobot.sr = 0
+            robot.set_wheel(0, 0)
+            robot.set_wheel(1, 0)
+
+            # time.sleep(0.2)
 
             leftFloor = robot.get_floor(0)
             rightFloor = robot.get_floor(1)
@@ -153,7 +189,7 @@ class Joystick:
                 robot.set_wheel(0, vrobot.sl)
                 robot.set_wheel(1, vrobot.sr)
 
-#time.sleep(0.01)
+                time.sleep(0.01)
 
                 leftFloor = robot.get_floor(0)
                 rightFloor = robot.get_floor(1)
@@ -207,7 +243,7 @@ class Joystick:
                     robot.set_wheel(1, vrobot.sr)
                 elif floor > BLACK_CUTOFF and seenBlack:
                     # stop
-                    time.sleep(0.2) # move a bit extra
+                    time.sleep(0.3) # move a bit extra
                     vrobot.sl = 0
                     vrobot.sr = 0
                     robot.set_wheel(0, 0)
@@ -233,26 +269,24 @@ class Joystick:
             robot.set_wheel(1,self.vrobot.sr)
             self.vrobot.t = time.time()  
 
+
+
     def launch_move_north(self, event=None, direction="NORTH", robotIndex=0):
-        print "launching move north", event, direction, robotIndex
         turn_right_thread = threading.Thread(target=self.move_north, args=(direction, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_south(self, event=None, direction="NORTH", robotIndex=0):
-        print "launching move south", event, direction, robotIndex
         turn_right_thread = threading.Thread(target=self.move_south, args=(direction, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_east(self, event=None, direction="NORTH", robotIndex=0):
-        print "launching move east", event, direction, robotIndex
         turn_right_thread = threading.Thread(target=self.move_east, args=(direction, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
 
     def launch_move_west(self, event=None, direction="NORTH", robotIndex=0):
-        print "launching move west", event, direction, robotIndex
         turn_right_thread = threading.Thread(target=self.move_west, args=(direction, robotIndex))
         turn_right_thread.daemon = True
         turn_right_thread.start()
@@ -427,6 +461,7 @@ def draw_virtual_world(virtual_world, joystick):
     while not gQuit:
         if joystick.gRobotList is not None:
             virtual_world.draw_food_layout(joystick.pellet_positions)
+            virtual_world.update_score(joystick.score)
             for agentIndex in range(3):
                 virtual_world.draw_robot(agentIndex)
                 virtual_world.draw_prox("left", agentIndex)
@@ -475,8 +510,6 @@ def nextTurn(gameState, gameMode):
     currentState = gameState
     
     old_agent_directions = gameState.directions[:]
-    print "old directions: ", old_agent_directions
-
 
     def move(currentState, agentIndex):
         legalActions = gameState.getLegalMoves(agentIndex)
@@ -502,7 +535,7 @@ def nextTurn(gameState, gameMode):
             move = joystick.launch_move_south
     
         # TODO - which robot do we move
-        print "moving robot %d to the %s" % (agentIndex, action)
+        print "moving robot %d to the %s. It's old direction was: %s" % (agentIndex, action, old_agent_directions[agentIndex])
         moveThread = threading.Thread(target=move, args=(None, old_agent_directions[agentIndex], agentIndex)) # the none is the event thing
         moveThread.daemon = True
         moveThread.start()
@@ -527,11 +560,6 @@ def nextTurn(gameState, gameMode):
 
     if currentState.boostTimer > 0:
         currentState.boostTimer -= 1
-    print "turn finished"
-
-    print "\n\nFOR THIS TURN:"
-    print "coordinates: ", currentState.get_all_coordinates()
-    print "\n\n"
 
     all_coords = currentState.get_all_coordinates()
 
@@ -574,7 +602,6 @@ def run_game(gameMode):
 
         # multithreading unnecessary for this part? it can be blocked since it's not main thread 
         # and doesn't need to do anything else
-        print "gamestate directions: ", gameState.directions
         gameState = nextTurn(gameState, gameMode)
 
     if gameState.isWin():
@@ -583,6 +610,7 @@ def run_game(gameMode):
         print "Sorry, you lost..."
 
     print "Score: ", gameState.score
+    joystick.score = gameState.score
     stopProg()
 
 
@@ -601,7 +629,7 @@ def main(argv=None):
 
     canvas_width = 500 #original: 700 # half width
     canvas_height = 200 # original 380half height
-    rCanvas = tk.Canvas(m, bg="black", width=canvas_width*2, height=canvas_height*2)
+    rCanvas = tk.Canvas(m, bg="white", width=canvas_width*2, height=canvas_height*2)
 
     global joystick
     
@@ -651,6 +679,7 @@ def main(argv=None):
                 new_pellet = [x_position, y_position]
                 pellets.append(new_pellet)
 
+    vWorld.add_score_label([175, -175])
 
     for pill in pellets:
         vWorld.add_pellet(pill)
@@ -658,6 +687,7 @@ def main(argv=None):
         vWorld.add_super_pellet(super_pill)
     for rect in rectangles:
         vWorld.add_obstacle(rect)
+
 
     draw_world_thread = threading.Thread(target=draw_virtual_world, args=(vWorld, joystick))
     draw_world_thread.daemon = True
