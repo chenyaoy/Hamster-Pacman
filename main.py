@@ -8,6 +8,7 @@ from tk_hamster_GUI import *
 import numpy as np
 import game
 import random, copy
+import util
 
 UPDATE_INTERVAL = 30
 BOARD_SIZE = 5
@@ -507,7 +508,6 @@ def draw_virtual_world(virtual_world, joystick):
         time.sleep(0.1)
 
 
-
 def human_turn():
     print "n-for North \n s-for South \n e- for East \n w- for west"
     # wait for console input
@@ -539,12 +539,32 @@ def human_turn():
 def ai_turn(gameState):
 
     def evaluationFunction(gameState):
-        return gameState.score
+        score = gameState.getScore()
+
+        pacmanPosition = gameState.positions[0]
+
+        # the closer the closest food is, the better
+        food = gameState.getFood()
+        minFoodDistance = sys.maxint
+        for foodPosition in food:
+            distance = util.manhattanDistance(pacmanPosition, foodPosition)
+            if distance < minFoodDistance:
+                minFoodDistance = distance
+        score += 1 * minFoodDistance
+
+        minGhostDistance = sys.maxint
+        for ghostPosition in gameState.getGhostPositions():
+            distance = util.manhattanDistance(pacmanPosition, ghostPosition)
+            if distance < minGhostDistance:
+                minGhostDistance = distance
+        score += 100 * minGhostDistance
+        return score
 
     def Vopt(gameState, depth, agent_index):
             if gameState.isWin() or gameState.isLose():
                 return (gameState.score, None)
             elif depth == 0:
+                print "agentIndex %d, score: %d" %(agent_index, evaluationFunction(gameState))
                 return (evaluationFunction(gameState), None)
 
             scores = []
@@ -555,22 +575,13 @@ def ai_turn(gameState):
                     newState = gameState.generateSuccessor(agent_index, action)
                     scores.append( (Vopt(newState, depth, agent_index + 1)[0] , action) )
             elif agent_index == 1:
-                if gameState.directions[agent_index] in actions:
-                    newState = gameState.generateSuccessor(agent_index, gameState.directions[agent_index])
-                    scores.append( (Vopt(newState, depth, agent_index + 1)[0] , gameState.directions[agent_index]) )
-                else:
-                    for action in actions:
-                        newState = gameState.generateSuccessor(agent_index, action)
-                        scores.append( (Vopt(newState, depth, agent_index + 1)[0] , action) )
+                for action in actions:
+                    newState = gameState.generateSuccessor(agent_index, action)
+                    scores.append( (Vopt(newState, depth, agent_index + 1)[0] , action) )
             else:
-                if gameState.directions[agent_index] in actions:
-                    newState = gameState.generateSuccessor(agent_index, gameState.directions[agent_index])
-                    scores.append( (Vopt(newState, depth - 1, 0)[0] , gameState.directions[agent_index]) )
-                else:
-                    for action in actions:
-                        newState = gameState.generateSuccessor(agent_index, action)
-                        scores.append( (Vopt(newState, depth -1, 0)[0] , action) )
-
+                for action in actions:
+                    newState = gameState.generateSuccessor(agent_index, action)
+                    scores.append( (Vopt(newState, depth - 1, 0)[0] , action) )
 
             if agent_index == 0:
                 max_score = max(scores)[0]
@@ -580,13 +591,16 @@ def ai_turn(gameState):
             else:
                 return (sum([score for score, action in scores]) / len(scores), random.choice([action for score, action in scores]))
 
-    return Vopt(gameState, 4, 0)[1]
+    utility, action = Vopt(gameState, 4, 0)
+    print "utility: ", utility
+    return action
 
-'''
-one run of this function corresponds to one 'turn' in the game
-pacman and all ghosts move once, and game state is updated
-'''
+
 def nextTurn(gameState, gameMode):
+    '''
+    one run of this function corresponds to one 'turn' in the game
+    pacman and all ghosts move once, and game state is updated
+    '''
 
     move_threads = []
     
@@ -612,10 +626,10 @@ def nextTurn(gameState, gameMode):
                 move = str(sys.stdin.readline())[0].lower()
 
         else: # Ghosts' moves
-            if currentState.directions[agentIndex] in legalActions:
-                action = currentState.directions[agentIndex]
-            else:
-                action = legalActions[np.random.randint(0, len(legalActions))] # choose action randomly
+            # if currentState.directions[agentIndex] in legalActions:
+            #     action = currentState.directions[agentIndex]
+            # else:
+            action = legalActions[np.random.randint(0, len(legalActions))] # choose action randomly
 
         currentState = currentState.generateSuccessor(agentIndex, action)
         
