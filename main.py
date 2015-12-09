@@ -16,7 +16,7 @@ gMaxRobotNum = 3 # max number of robots to control
 gQuit = False
 m = None
 
-BLACK_CUTOFF = 75
+BLACK_CUTOFF = 40
 
 class VirtualWorldGui:
     def __init__(self, vWorld, m):
