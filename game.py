@@ -19,6 +19,13 @@ class Grid():
     def toString(self, grid):
         print "\n".join("\t".join(map(str,l)) for l in grid)
 
+    def asList(self):
+        l = []
+        for x in range(len(self.data)):
+            for y in range(len(self.data)):
+                if self.data[x][y]:
+                    l.append((x, y))
+        return l
 
 class GameState():
     def __init__(self, prevState = None):
@@ -187,8 +194,17 @@ class GameState():
     def getNumFood(self):
         return self.numFood
 
+    def getScore(self):
+        return self.score
+
     def setNumFood(self, newFood):
         self.numFood = newFood
+
+    def getFood(self):
+        return self.food.asList()
+
+    def getGhostPositions(self):
+        return [self.positions[1], self.positions[2]]
 
     def isWin(self):
         return self.win
