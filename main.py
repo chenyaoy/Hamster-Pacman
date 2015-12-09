@@ -160,13 +160,13 @@ class Joystick:
             rightFloor = robot.get_floor(1)
 
             # move forward until both white
-            # while not (leftFloor > BLACK_CUTOFF and rightFloor > BLACK_CUTOFF):
+            while not (leftFloor > BLACK_CUTOFF and rightFloor > BLACK_CUTOFF):
 
-            seenBlackLeft = False
-            seenBlackRight = False
+            # seenBlackLeft = False
+            # seenBlackRight = False
 
             # move forward until both have seen black and at least one is white
-            while (leftFloor < BLACK_CUTOFF and rightFloor < BLACK_CUTOFF):
+            # while (leftFloor < BLACK_CUTOFF and rightFloor < BLACK_CUTOFF):
                 # print "forward moving inital: left %d right %d" % (leftFloor, rightFloor)
                 vrobot.sl = 15
                 vrobot.sr = 15
