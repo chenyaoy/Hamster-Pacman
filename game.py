@@ -148,7 +148,7 @@ class GameState():
 
         # Eat food
         if state.food[x][y]:
-            state.scoreChange += 10
+            state.scoreChange += 20
             state.food[x][y] = False
             numFood -= 1
             state.setNumFood(numFood)
