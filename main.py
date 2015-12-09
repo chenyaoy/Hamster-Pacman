@@ -156,17 +156,19 @@ class Joystick:
             robot.set_wheel(0, vrobot.sl)
             robot.set_wheel(1, vrobot.sr)
 
+            time.sleep(0.2)
+
             leftFloor = robot.get_floor(0)
             rightFloor = robot.get_floor(1)
 
             # move forward until both white
-            # while not (leftFloor > BLACK_CUTOFF and rightFloor > BLACK_CUTOFF):
+            while not (leftFloor > BLACK_CUTOFF and rightFloor > BLACK_CUTOFF):
 
             # seenBlackLeft = False
             # seenBlackRight = False
 
             # move forward until both have seen black and at least one is white
-            while (leftFloor < BLACK_CUTOFF and rightFloor < BLACK_CUTOFF):
+            # while (leftFloor < BLACK_CUTOFF and rightFloor < BLACK_CUTOFF):
                 # print "forward moving inital: left %d right %d" % (leftFloor, rightFloor)
                 vrobot.sl = 15
                 vrobot.sr = 15
@@ -229,10 +231,10 @@ class Joystick:
             rightFloor = robot.get_floor(1)
 
             # move forward until both white
-            # while not (leftFloor > BLACK_CUTOFF and rightFloor > BLACK_CUTOFF):
+            while not (leftFloor > BLACK_CUTOFF and rightFloor > BLACK_CUTOFF):
 
             # move forward until something is white
-            while leftFloor < BLACK_CUTOFF and rightFloor < BLACK_CUTOFF:
+            # while leftFloor < BLACK_CUTOFF and rightFloor < BLACK_CUTOFF:
                 vrobot.sl = 15
                 vrobot.sr = 15
                 robot.set_wheel(0, vrobot.sl)
@@ -246,7 +248,7 @@ class Joystick:
             robot.set_wheel(0, vrobot.sl)
             robot.set_wheel(1, vrobot.sr)
 
-            time.sleep(0.3)
+            time.sleep(0.1)
 
             vrobot.sl = 0
             vrobot.sr = 0
@@ -265,11 +267,13 @@ class Joystick:
             if direction == -1:
                 #turning left
                 if leftFloor < BLACK_CUTOFF:
-                    turnCount += 1
+                    # turnCount += 1
+                    pass
 
             elif direction == 1:
                 if rightFloor < BLACK_CUTOFF:
-                    turnCount += 1
+                    # turnCount += 1
+                    pass
 
             floor = robot.get_floor(floorDir)
 
@@ -286,7 +290,7 @@ class Joystick:
                         robot.set_wheel(1, vrobot.sr)
                     elif floor > BLACK_CUTOFF and seenBlack:
                         # stop
-                        time.sleep(0.3) # move a bit extra
+                        time.sleep(0.2) # move a bit extra
                         vrobot.sl = 0
                         vrobot.sr = 0
                         robot.set_wheel(0, 0)
@@ -338,7 +342,7 @@ class Joystick:
             # print "moving north:" 
             # print "last direction: ", direction
             # print "robot index:", robotIndex
-            # self.gRobotList[robotIndex].set_wheel_balance(-29)
+            # self.gRobotList[robotIndex].set_wheel_balance(-3)
 
             robot = self.gRobotList[robotIndex]
             vrobot = self.vrobots[robotIndex]
@@ -459,7 +463,7 @@ class Joystick:
         if len(self.gRobotList) >= 3:
             robot = self.gRobotList[robotIndex]
             vrobot = self.vrobots[robotIndex]
-            robot.set_wheel_balance(-3)
+            # robot.set_wheel_balance(-3)
             t = time.time()
             del_t = t - vrobot.t
             vrobot.t = t # update the tick
@@ -700,7 +704,7 @@ def initialize_wheel_balance():
     robots = joystick.gRobotList
     robots[0].set_wheel_balance(7)
     robots[1].set_wheel_balance(4)
-    robots[2].set_wheel_balance(-29)
+    robots[2].set_wheel_balance(-3)
 
 
 # This is run on a separate thread from the main thread so that we can wait for moves to complete
